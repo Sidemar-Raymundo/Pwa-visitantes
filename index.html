@@ -426,7 +426,7 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE BACKUP COM SEÇÕES IDENTIFICADAS -->
+    <!-- ✅ MODAL DE BACKUP COM IDs NAS SEÇÕES -->
     <div id="backupModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -697,57 +697,46 @@
 
         // ✅ BACKUP PRINCIPAL (Visitantes Ativos)
         const saveToGoogleDrive = async () => {
-            console.log('🔵 Iniciando backup de visitantes...');
-            
             if (!gapiInited || !gisInited) {
-                console.error('❌ Google APIs não inicializadas');
                 alert('Carregando serviços do Google... Tente novamente em 2 segundos.');
                 return;
             }
 
             driveFileId = localStorage.getItem('googleDriveBackupFileId');
-            console.log('📁 ID do arquivo salvo:', driveFileId);
 
             const tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
                 callback: async (resp) => {
                     if (resp.error) {
-                        console.error('❌ OAuth error:', resp);
+                        console.error('OAuth error:', resp);
                         alert('Autenticação com Google falhou.');
                         return;
                     }
 
-                    console.log('✅ Autenticação OK');
                     const accessToken = resp.access_token;
 
                     if (!driveFileId) {
-                        console.log('🔍 Buscando arquivo existente...');
                         driveFileId = await findExistingFile(accessToken, GOOGLE_DRIVE_FILE_NAME);
-                        console.log('📁 ID encontrado:', driveFileId);
                     }
 
-                    console.log('📊 Visitantes para backup:', visitors.length);
-                    
                     const backupData = {
                         version: '1.0',
                         exportDate: new Date().toISOString(),
                         visitors: visitors
-                    };                    const fileContent = JSON.stringify(backupData, null, 2);
+                    };
+                    const fileContent = JSON.stringify(backupData, null, 2);
                     const blob = new Blob([fileContent], { type: 'application/json' });
-                    console.log('📦 Tamanho do backup:', blob.size, 'bytes');
 
                     let url, method, headers, body;
 
                     if (driveFileId) {
                         url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`;
                         method = 'PATCH';
-                        headers = {
-                            'Authorization': `Bearer ${accessToken}`,
+                        headers = {                            'Authorization': `Bearer ${accessToken}`,
                             'Content-Type': 'application/json'
                         };
                         body = blob;
-                        console.log('🔄 Atualizando arquivo existente');
                     } else {
                         const metadata = { name: GOOGLE_DRIVE_FILE_NAME, mimeType: 'application/json' };
                         const form = new FormData();
@@ -757,34 +746,28 @@
                         method = 'POST';
                         headers = { 'Authorization': `Bearer ${accessToken}` };
                         body = form;
-                        console.log('📝 Criando novo arquivo');
                     }
-
-                    console.log('🌐 URL:', url);
-                    console.log('📤 Método:', method);
 
                     try {
                         const response = await fetch(url, { method, headers, body });
                         const result = await response.json();
-                        console.log('📥 Resposta:', response.status, result);
 
                         if (response.ok) {
                             if (result.id) {
                                 localStorage.setItem('googleDriveBackupFileId', result.id);
-                                console.log('💾 ID salvo:', result.id);
                             }
                             alert('✅ Backup de VISITANTES salvo com sucesso!\n\nArquivo: ' + GOOGLE_DRIVE_FILE_NAME);
                         } else {
-                            console.error('❌ Erro no upload:', result);
-                            alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || JSON.stringify(result)));
+                            console.error('Erro no upload:', result);
+                            alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || 'Erro desconhecido'));
                         }
                     } catch (error) {
-                        console.error('❌ Erro de rede:', error);
-                        alert('❌ Erro de conexão com o Google Drive:\n' + error.message);
+                        console.error('Erro de rede:', error);
+                        alert('❌ Erro de conexão com o Google Drive.');
                     }
-                }            });
+                }
+            });
 
-            console.log('🔑 Solicitando token de acesso...');
             tokenClient.requestAccessToken({ prompt: '' });
         };
 
@@ -799,8 +782,7 @@
 
             const tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: async (resp) => {
+                scope: SCOPES,                callback: async (resp) => {
                     if (resp.error) {
                         console.error('OAuth error:', resp);
                         alert('Autenticação com Google falhou.');
@@ -831,7 +813,8 @@
                             'Content-Type': 'application/json'
                         };
                         body = blob;
-                    } else {                        const metadata = { name: GOOGLE_DRIVE_TRASH_FILE_NAME, mimeType: 'application/json' };
+                    } else {
+                        const metadata = { name: GOOGLE_DRIVE_TRASH_FILE_NAME, mimeType: 'application/json' };
                         const form = new FormData();
                         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                         form.append('file', blob);
@@ -848,8 +831,7 @@
                         if (response.ok) {
                             if (result.id) {
                                 localStorage.setItem('googleDriveTrashFileId', result.id);
-                            }
-                            alert('✅ Backup da LIXEIRA salvo com sucesso no Google Drive!\n\nArquivo: ' + GOOGLE_DRIVE_TRASH_FILE_NAME);
+                            }                            alert('✅ Backup da LIXEIRA salvo com sucesso no Google Drive!\n\nArquivo: ' + GOOGLE_DRIVE_TRASH_FILE_NAME);
                         } else {
                             console.error('Erro no upload:', result);
                             alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || 'Erro desconhecido'));
@@ -880,7 +862,8 @@
             const jsonStr = JSON.stringify(data, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');            a.href = url; a.download = GOOGLE_DRIVE_FILE_NAME;
+            const a = document.createElement('a');
+            a.href = url; a.download = GOOGLE_DRIVE_FILE_NAME;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
             alert('✅ Backup de visitantes baixado com sucesso!');
@@ -897,7 +880,6 @@
             URL.revokeObjectURL(url);
             alert('✅ Backup da lixeira baixado com sucesso!');
         };
-
         const restoreBackup = (file) => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -929,7 +911,8 @@
                     const data = JSON.parse(e.target.result);
                     if (!data.trashVisitors || !Array.isArray(data.trashVisitors)) {
                         alert('❌ Arquivo de backup da lixeira inválido!');
-                        return;                    }
+                        return;
+                    }
                     if (confirm(`⚠️ Substituir lixeira atual pelo backup?`)) {
                         trashVisitors = data.trashVisitors;
                         localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
@@ -946,8 +929,7 @@
         };
 
         const hideAddModal = () => { modalEl.style.display = 'none'; editingId = null; };
-        const showFilterModal = () => filterModalEl.style.display = 'flex';
-        const hideFilterModal = () => filterModalEl.style.display = 'none';
+        const showFilterModal = () => filterModalEl.style.display = 'flex';        const hideFilterModal = () => filterModalEl.style.display = 'none';
         const hideBackupModal = () => { backupModalEl.style.display = 'none'; };
 
         // ✅ NOVA FUNÇÃO: Mostrar modal com opções contextuais
@@ -957,12 +939,10 @@
             const divider = document.getElementById('backupDivider');
             
             if (currentView === 'trash') {
-                // Está na lixeira → mostra apenas backup da lixeira
                 mainSection.style.display = 'none';
                 divider.style.display = 'none';
                 trashSection.style.display = 'block';
             } else {
-                // Está na lista principal → mostra apenas backup de visitantes
                 mainSection.style.display = 'block';
                 divider.style.display = 'none';
                 trashSection.style.display = 'none';
@@ -978,7 +958,8 @@
             $('#visitorName').value = visitor.name;
             $('#apartment').value = visitor.apartment;
             $('#entryDate').value = visitor.entryDate;
-            $('#notes').value = visitor.notes || '';            if (visitor.exitDate === null) {
+            $('#notes').value = visitor.notes || '';
+            if (visitor.exitDate === null) {
                 $('#noExitDate').checked = true;
                 $('#exitDate').disabled = true;
                 $('#exitDate').required = false;
@@ -997,14 +978,13 @@
             loadGoogleScripts();
 
             $('#showAddModalBtn').addEventListener('click', showAddModal);
-            $('#fabAddBtn').addEventListener('click', showAddModal);
-            $('#addFirstBtn').addEventListener('click', showAddModal);
+            $('#fabAddBtn').addEventListener('click', showAddModal);            $('#addFirstBtn').addEventListener('click', showAddModal);
             $('#closeModalBtn').addEventListener('click', hideAddModal);
             $('#cancelModalBtn').addEventListener('click', hideAddModal);
             $('#closeFilterModalBtn').addEventListener('click', hideFilterModal);
             $('#closeBackupModalBtn').addEventListener('click', hideBackupModal);
             
-            // ✅ EVENTO ATUALIZADO: Usa showBackupModal em vez de mostrar direto
+            // ✅ EVENTO ATUALIZADO DO BOTÃO BACKUP
             $('#backupBtn').addEventListener('click', showBackupModal);
             
             // ✅ Eventos do Backup Principal
@@ -1019,7 +999,7 @@
             // ✅ Eventos do Backup da Lixeira
             $('#downloadTrashBackupBtn').addEventListener('click', downloadTrashBackup);
             $('#uploadTrashBackupBtn').addEventListener('click', () => $('#restoreTrashFileInput').click());
-            $('#saveTrashToDriveBtn').addEventListener('click', saveTrashToDriveBtn);
+            $('#saveTrashToDriveBtn').addEventListener('click', saveTrashToGoogleDrive);
             $('#restoreTrashFileInput').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) { restoreTrashBackup(file); e.target.value = ''; }
@@ -1027,7 +1007,8 @@
 
             addFormEl.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const noExit = $('#noExitDate').checked;                const exitDate = noExit ? null : $('#exitDate').value;
+                const noExit = $('#noExitDate').checked;
+                const exitDate = noExit ? null : $('#exitDate').value;
                 if (!noExit && !exitDate) { alert('Informe a data de saída ou marque "Sem data de saída".'); return; }
                 const visitorData = {
                     name: $('#visitorName').value.trim(),
@@ -1047,7 +1028,6 @@
                 if (e.target.checked) { exitDateInput.value = ''; exitDateInput.required = false; }
                 else { exitDateInput.required = true; }
             });
-
             searchInputEl.addEventListener('input', renderVisitors);
             $('#toggleStatsBtn').addEventListener('click', () => {
                 statsSectionEl.style.display = statsSectionEl.style.display === 'none' ? 'block' : 'none';
@@ -1076,7 +1056,8 @@
             $('#navExpiredBtn').addEventListener('click', () => updateView('main','expired','Controle de Visitantes','Vencidos','Nenhuma liberação vencida','Não há visitantes com status vencido no momento.',true,true));
             $('#navTrashBtn').addEventListener('click', () => updateView('trash','all','Lixeira de Visitantes','Excluídos','Lixeira vazia','Não há visitantes excluídos no momento.',false,false));
 
-            $('#showFilterModalBtn').addEventListener('click', showFilterModal);            $('#applyFilterBtn').addEventListener('click', () => {
+            $('#showFilterModalBtn').addEventListener('click', showFilterModal);
+            $('#applyFilterBtn').addEventListener('click', () => {
                 currentFilter = $('#filterStatus').value;
                 currentApartmentFilter = $('#filterApartment').value.trim();
                 renderVisitors(); hideFilterModal();
@@ -1095,8 +1076,7 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('SW registrado:', reg.scope))
-                    .catch(err => console.error('Erro ao registrar SW:', err));
-            });
+                    .catch(err => console.error('Erro ao registrar SW:', err));            });
         }
 
         let refreshing = false;
