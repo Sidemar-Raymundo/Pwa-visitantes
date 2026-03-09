@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -434,29 +435,41 @@
             </div>
             <div style="margin-bottom: 16px;">
                 <p style="color: #4a5568; margin-bottom: 16px;">Proteja seus dados fazendo backup regularmente!</p>
-                <button class="btn btn-primary" id="downloadBackupBtn" style="width: 100%; margin-bottom: 12px;">📥 Fazer Backup (Baixar)</button>
-                <button class="btn btn-secondary" id="uploadBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Backup</button>
-                <button class="btn btn-secondary" id="saveToDriveBtn" style="width: 100%;">🟢 Salvar no Google Drive</button>
+                
+                <!-- ✅ BACKUP PRINCIPAL (Visitantes Ativos) -->
+                <button class="btn btn-primary" id="downloadBackupBtn" style="width: 100%; margin-bottom: 12px;">📥 Backup Visitantes (Baixar)</button>
+                <button class="btn btn-secondary" id="uploadBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Visitantes</button>
+                <button class="btn btn-secondary" id="saveToDriveBtn" style="width: 100%; margin-bottom: 12px;">🟢 Salvar Visitantes no Google Drive</button>
+                                <hr style="margin: 16px 0; border: 1px solid #e2e8f0;">
+                
+                <!-- ✅ BACKUP DA LIXEIRA (Visitantes Excluídos) -->
+                <button class="btn btn-secondary" id="downloadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">🗑️ Backup Lixeira (Baixar)</button>
+                <button class="btn btn-secondary" id="uploadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Lixeira</button>
+                <button class="btn btn-secondary" id="saveTrashToDriveBtn" style="width: 100%;">🟢 Salvar Lixeira no Google Drive</button>
+                
                 <input type="file" id="fileInput" accept=".json" style="display: none;">
+                <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
+                <input type="file" id="restoreTrashFileInput" accept=".json" style="display: none;">
             </div>
-            <div style="background-color: #fff5f5; padding: 12px; border-radius: 8px; border-left: 4px solid #f56565;">                <p style="font-size: 0.85rem; color: #742a2a;">
+            <div style="background-color: #fff5f5; padding: 12px; border-radius: 8px; border-left: 4px solid #f56565;">
+                <p style="font-size: 0.85rem; color: #742a2a;">
                     <strong>⚠️ Importante:</strong> Ao restaurar um backup, os dados atuais serão substituídos.
                 </p>
             </div>
         </div>
     </div>
 
-    <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
-
     <script>
         // --- Configuração do Google Drive ---
         const GOOGLE_DRIVE_FILE_NAME = 'backup-visitantes.json';
+        const GOOGLE_DRIVE_TRASH_FILE_NAME = 'backup-lixeria.json';
         const CLIENT_ID = '904521449655-icpbravdktcq7u6odhqlnvc7adimegmu.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
         let gapiInited = false;
         let gisInited = false;
-        let driveFileId = null; // ✅ VARIÁVEL ADICIONADA PARA PERSISTÊNCIA DO ID
+        let driveFileId = null;
+        let driveTrashFileId = null;
 
         const loadGoogleScripts = () => {
             const gapiScript = document.createElement('script');
@@ -476,8 +489,7 @@
                 gapiInited = true;
             } catch (error) {
                 console.error('Erro ao inicializar gapi:', error);
-            }
-        };
+            }        };
 
         // --- Dados e Estados ---
         const STORAGE_KEY = 'visitors_app_data';
@@ -489,6 +501,7 @@
             const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000;
             const now = new Date();
             const nowStr = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0];
+
             visitors = visitors.filter(v => {
                 if (!v || typeof v !== 'object') return false;
                 if (v.exitDate === null) return true;
@@ -525,8 +538,7 @@
         const pendingCountEl = $('#pendingCount');
         const expiredCountEl = $('#expiredCount');
         const searchInputEl = $('#searchInput');
-        const pageTitleEl = $('#pageTitle');
-        const pageSubtitleEl = $('#pageSubtitle');
+        const pageTitleEl = $('#pageTitle');        const pageSubtitleEl = $('#pageSubtitle');
         const emptyStateTitleEl = $('#emptyStateTitle');
         const emptyStateTextEl = $('#emptyStateText');
         const addFirstBtn = $('#addFirstBtn');
@@ -537,6 +549,7 @@
         const addFormEl = $('#addForm');
         const filterModalEl = $('#filterModal');
         const backupModalEl = $('#backupModal');
+
         const formatDate = (dateStr) => {
             if (!dateStr) return 'Saída livre';
             const [year, month, day] = dateStr.split('-');
@@ -574,8 +587,7 @@
             if (filteredVisitors.length === 0) {
                 visitorsListEl.innerHTML = '';
                 emptyStateEl.style.display = 'block';
-                return;
-            }
+                return;            }
             emptyStateEl.style.display = 'none';
 
             filteredVisitors.forEach(v => {
@@ -586,7 +598,8 @@
                 const statusIcon = getStatusIcon(status);
 
                 let actionButtons = '';
-                if (currentView === 'trash') {                    actionButtons = `<button class="action-btn action-restore" onclick="restoreVisitor(${v.id})">🔄</button><button class="action-btn action-delete" onclick="deleteVisitorPermanently(${v.id})">🗑️</button>`;
+                if (currentView === 'trash') {
+                    actionButtons = `<button class="action-btn action-restore" onclick="restoreVisitor(${v.id})">🔄</button><button class="action-btn action-delete" onclick="deleteVisitorPermanently(${v.id})">🗑️</button>`;
                 } else {
                     actionButtons = `<button class="action-btn action-edit" onclick="editVisitor(${v.id})">✏️</button><button class="action-btn action-delete" onclick="deleteVisitor(${v.id})">🗑️</button>`;
                 }
@@ -623,7 +636,6 @@
             document.body.appendChild(toast);
             setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.5s'; setTimeout(()=>document.body.removeChild(toast),500); }, 3000);
         };
-
         const saveVisitor = (data) => {
             if (editingId !== null) {
                 const index = visitors.findIndex(v => v.id === editingId);
@@ -635,7 +647,8 @@
             if (editingId === null) showBackupReminder();
         };
 
-        const deleteVisitor = (id) => {            if (confirm("Deseja realmente excluir esta liberação? Ela será movida para a lixeira.")) {
+        const deleteVisitor = (id) => {
+            if (confirm("Deseja realmente excluir esta liberação? Ela será movida para a lixeira.")) {
                 const index = visitors.findIndex(v => v.id === id);
                 if (index !== -1) {
                     const visitor = visitors.splice(index, 1)[0];
@@ -670,22 +683,21 @@
         };
 
         // --- Google Drive: buscar arquivo existente ---
-        const findExistingFile = async (accessToken) => {
-            const query = `name='${GOOGLE_DRIVE_FILE_NAME}' and trashed=false`;
-            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
-                headers: { Authorization: `Bearer ${accessToken}` }
+        const findExistingFile = async (accessToken, fileName) => {
+            const query = `name='${fileName}' and trashed=false`;
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {                headers: { Authorization: `Bearer ${accessToken}` }
             });
             const data = await response.json();
             return data.files && data.files.length > 0 ? data.files[0].id : null;
         };
 
-        // ✅ FUNÇÃO CORRIGIDA DO GOOGLE DRIVE
+        // ✅ BACKUP PRINCIPAL (Visitantes Ativos) - NÃO inclui lixeira
         const saveToGoogleDrive = async () => {
             if (!gapiInited || !gisInited) {
                 alert('Carregando serviços do Google... Tente novamente em 2 segundos.');
                 return;
             }
-            // 🔹 Pega o ID salvo no localStorage (persistência entre sessões)
+
             driveFileId = localStorage.getItem('googleDriveBackupFileId');
 
             const tokenClient = google.accounts.oauth2.initTokenClient({
@@ -700,16 +712,15 @@
 
                     const accessToken = resp.access_token;
 
-                    // 🔹 Se não tiver ID salvo, busca pelo nome (primeira vez ou fallback)
                     if (!driveFileId) {
-                        driveFileId = await findExistingFile(accessToken);
+                        driveFileId = await findExistingFile(accessToken, GOOGLE_DRIVE_FILE_NAME);
                     }
 
+                    // ✅ APENAS visitantes ativos (SEM lixeira)
                     const backupData = {
                         version: '1.0',
                         exportDate: new Date().toISOString(),
-                        visitors: visitors,
-                        trashVisitors: trashVisitors
+                        visitors: visitors
                     };
                     const fileContent = JSON.stringify(backupData, null, 2);
                     const blob = new Blob([fileContent], { type: 'application/json' });
@@ -717,23 +728,21 @@
                     let url, method, headers, body;
 
                     if (driveFileId) {
-                        // 🔹 ATUALIZAR arquivo existente (sobrescreve conteúdo)
                         url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`;
                         method = 'PATCH';
                         headers = {
                             'Authorization': `Bearer ${accessToken}`,
                             'Content-Type': 'application/json'
                         };
-                        body = blob;
-                    } else {
-                        // 🔹 CRIAR novo arquivo
+                        body = blob;                    } else {
                         const metadata = { name: GOOGLE_DRIVE_FILE_NAME, mimeType: 'application/json' };
                         const form = new FormData();
                         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                         form.append('file', blob);
                         url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
                         method = 'POST';
-                        headers = { 'Authorization': `Bearer ${accessToken}` };                        body = form;
+                        headers = { 'Authorization': `Bearer ${accessToken}` };
+                        body = form;
                     }
 
                     try {
@@ -741,14 +750,89 @@
                         const result = await response.json();
 
                         if (response.ok) {
-                            // 🔹 SALVA O ID DO ARQUIVO PARA PRÓXIMOS BACKUPS
                             if (result.id) {
                                 localStorage.setItem('googleDriveBackupFileId', result.id);
                             }
-                            alert('✅ Backup salvo com sucesso no Google Drive!\n\nO arquivo foi ATUALIZADO com os dados atuais.');
+                            alert('✅ Backup de VISITANTES salvo com sucesso no Google Drive!\n\nArquivo: ' + GOOGLE_DRIVE_FILE_NAME);
                         } else {
                             console.error('Erro no upload:', result);
                             alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || 'Erro desconhecido'));
+                        }
+                    } catch (error) {
+                        console.error('Erro de rede:', error);
+                        alert('❌ Erro de conexão com o Google Drive.');
+                    }
+                }
+            });
+
+            tokenClient.requestAccessToken({ prompt: '' });
+        };
+
+        // ✅ BACKUP DA LIXEIRA (Visitantes Excluídos) - APENAS lixeira
+        const saveTrashToGoogleDrive = async () => {
+            if (!gapiInited || !gisInited) {
+                alert('Carregando serviços do Google... Tente novamente em 2 segundos.');
+                return;
+            }
+
+            driveTrashFileId = localStorage.getItem('googleDriveTrashFileId');
+
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: async (resp) => {
+                    if (resp.error) {
+                        console.error('OAuth error:', resp);
+                        alert('Autenticação com Google falhou.');                        return;
+                    }
+
+                    const accessToken = resp.access_token;
+
+                    if (!driveTrashFileId) {
+                        driveTrashFileId = await findExistingFile(accessToken, GOOGLE_DRIVE_TRASH_FILE_NAME);
+                    }
+
+                    // ✅ APENAS lixeira
+                    const backupData = {
+                        version: '1.0',
+                        exportDate: new Date().toISOString(),
+                        trashVisitors: trashVisitors
+                    };
+                    const fileContent = JSON.stringify(backupData, null, 2);
+                    const blob = new Blob([fileContent], { type: 'application/json' });
+
+                    let url, method, headers, body;
+
+                    if (driveTrashFileId) {
+                        url = `https://www.googleapis.com/upload/drive/v3/files/${driveTrashFileId}?uploadType=media`;
+                        method = 'PATCH';
+                        headers = {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        };
+                        body = blob;
+                    } else {
+                        const metadata = { name: GOOGLE_DRIVE_TRASH_FILE_NAME, mimeType: 'application/json' };
+                        const form = new FormData();
+                        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                        form.append('file', blob);
+                        url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+                        method = 'POST';
+                        headers = { 'Authorization': `Bearer ${accessToken}` };
+                        body = form;
+                    }
+
+                    try {
+                        const response = await fetch(url, { method, headers, body });
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            if (result.id) {
+                                localStorage.setItem('googleDriveTrashFileId', result.id);
+                            }
+                            alert('✅ Backup da LIXEIRA salvo com sucesso no Google Drive!\n\nArquivo: ' + GOOGLE_DRIVE_TRASH_FILE_NAME);
+                        } else {
+                            console.error('Erro no upload:', result);                            alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || 'Erro desconhecido'));
                         }
                     } catch (error) {
                         console.error('Erro de rede:', error);
@@ -772,7 +856,8 @@
         };
 
         const downloadBackup = () => {
-            const data = { version: '1.0', exportDate: new Date().toISOString(), visitors, trashVisitors };
+            // ✅ APENAS visitantes ativos
+            const data = { version: '1.0', exportDate: new Date().toISOString(), visitors: visitors };
             const jsonStr = JSON.stringify(data, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -780,25 +865,36 @@
             a.href = url; a.download = GOOGLE_DRIVE_FILE_NAME;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            alert('✅ Backup baixado com sucesso!');
+            alert('✅ Backup de visitantes baixado com sucesso!');
         };
-        const restoreBackup = (file) => {
-            const reader = new FileReader();
+
+        const downloadTrashBackup = () => {
+            // ✅ APENAS lixeira
+            const data = { version: '1.0', exportDate: new Date().toISOString(), trashVisitors: trashVisitors };
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = GOOGLE_DRIVE_TRASH_FILE_NAME;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('✅ Backup da lixeira baixado com sucesso!');
+        };
+
+        const restoreBackup = (file) => {            const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (!data.visitors || !Array.isArray(data.visitors) || !data.trashVisitors || !Array.isArray(data.trashVisitors)) {
+                    if (!data.visitors || !Array.isArray(data.visitors)) {
                         alert('❌ Arquivo de backup inválido!');
                         return;
                     }
-                    if (confirm(`⚠️ Substituir dados atuais pelo backup?`)) {
+                    if (confirm(`⚠️ Substituir visitantes atuais pelo backup?`)) {
                         visitors = data.visitors;
-                        trashVisitors = data.trashVisitors;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
-                        localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
                         renderVisitors();
                         backupModalEl.style.display = 'none';
-                        alert('✅ Backup restaurado com sucesso!');
+                        alert('✅ Backup de visitantes restaurado com sucesso!');
                     }
                 } catch (error) {
                     alert('❌ Erro ao ler arquivo de backup!');
@@ -808,10 +904,33 @@
             reader.readAsText(file);
         };
 
+        const restoreTrashBackup = (file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.trashVisitors || !Array.isArray(data.trashVisitors)) {
+                        alert('❌ Arquivo de backup da lixeira inválido!');
+                        return;
+                    }
+                    if (confirm(`⚠️ Substituir lixeira atual pelo backup?`)) {
+                        trashVisitors = data.trashVisitors;
+                        localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
+                        renderVisitors();
+                        backupModalEl.style.display = 'none';
+                        alert('✅ Backup da lixeira restaurado com sucesso!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao ler arquivo de backup da lixeira!');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        };
+
         const hideAddModal = () => { modalEl.style.display = 'none'; editingId = null; };
         const showFilterModal = () => filterModalEl.style.display = 'flex';
-        const hideFilterModal = () => filterModalEl.style.display = 'none';
-        const hideBackupModal = () => backupModalEl.style.display = 'none';
+        const hideFilterModal = () => filterModalEl.style.display = 'none';        const hideBackupModal = () => backupModalEl.style.display = 'none';
 
         const editVisitor = (id) => {
             const visitor = visitors.find(v => v.id === id);
@@ -831,7 +950,8 @@
                 $('#exitDate').value = visitor.exitDate;
                 $('#exitDate').required = true;
             }
-            modalTitleEl.textContent = 'Editar Liberação';            modalEl.style.display = 'flex';
+            modalTitleEl.textContent = 'Editar Liberação';
+            modalEl.style.display = 'flex';
         };
 
         // --- Eventos ---
@@ -846,12 +966,22 @@
             $('#closeFilterModalBtn').addEventListener('click', hideFilterModal);
             $('#closeBackupModalBtn').addEventListener('click', hideBackupModal);
             $('#backupBtn').addEventListener('click', () => backupModalEl.style.display = 'flex');
+            
+            // ✅ Eventos do Backup Principal
             $('#downloadBackupBtn').addEventListener('click', downloadBackup);
             $('#uploadBackupBtn').addEventListener('click', () => $('#restoreFileInput').click());
             $('#saveToDriveBtn').addEventListener('click', saveToGoogleDrive);
             $('#restoreFileInput').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) { restoreBackup(file); e.target.value = ''; }
+            });
+            
+            // ✅ Eventos do Backup da Lixeira
+            $('#downloadTrashBackupBtn').addEventListener('click', downloadTrashBackup);
+            $('#uploadTrashBackupBtn').addEventListener('click', () => $('#restoreTrashFileInput').click());
+            $('#saveTrashToDriveBtn').addEventListener('click', saveTrashToGoogleDrive);            $('#restoreTrashFileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) { restoreTrashBackup(file); e.target.value = ''; }
             });
 
             addFormEl.addEventListener('submit', (e) => {
@@ -880,7 +1010,8 @@
 
             searchInputEl.addEventListener('input', renderVisitors);
             $('#toggleStatsBtn').addEventListener('click', () => {
-                statsSectionEl.style.display = statsSectionEl.style.display === 'none' ? 'block' : 'none';            });
+                statsSectionEl.style.display = statsSectionEl.style.display === 'none' ? 'block' : 'none';
+            });
 
             const setActiveNav = (btnId) => {
                 $all('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -898,7 +1029,6 @@
                 const navMap = { 'main-all':'#navAllBtn','main-active':'#navActiveBtn','main-pending':'#navPendingBtn','main-expired':'#navExpiredBtn','trash':'#navTrashBtn' };
                 setActiveNav(navMap[`${view}-${filter}`] || '#navAllBtn');
             };
-
             $('#navAllBtn').addEventListener('click', () => updateView('main','all','Controle de Visitantes','Todos','Nenhuma liberação registrada','Comece registrando uma nova liberação de visitante',true,true));
             $('#navActiveBtn').addEventListener('click', () => updateView('main','active','Controle de Visitantes','Ativos','Nenhuma liberação ativa','Não há visitantes com status ativo no momento.',true,true));
             $('#navPendingBtn').addEventListener('click', () => updateView('main','pending','Controle de Visitantes','Pendentes','Nenhuma liberação pendente','Não há visitantes com status pendente no momento.',true,true));
@@ -929,7 +1059,8 @@
             });
         }
 
-        let refreshing = false;        navigator.serviceWorker.addEventListener('controllerchange', () => {
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) { refreshing = true; window.location.reload(); }
         });
     </script>
