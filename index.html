@@ -3,33 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Visitantes">
-    
     <title>Controle de Visitantes</title>
     <meta name="theme-color" content="#2d3748">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
-    
     <style>
-        /* Reset básico */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        :root {
+            --bg-primary: #f7fafc;
+            --bg-secondary: #ffffff;
+            --bg-section: #f7fafc;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --header-bg: #2d3748;
+            --header-text: #ffffff;
+            --card-shadow: rgba(0,0,0,0.05);
+            --nav-bg: #ffffff;
+            --nav-border: #e2e8f0;
+            --input-bg: #ffffff;
+            --modal-overlay: rgba(0,0,0,0.5);
+            --banner-warning: #fff5f5;
+            --banner-warning-border: #fc8181;
+            --banner-warning-text: #c53030;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-section: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --header-bg: #1a202c;
+            --header-text: #f7fafc;
+            --card-shadow: rgba(0,0,0,0.3);
+            --nav-bg: #2d3748;
+            --nav-border: #4a5568;
+            --input-bg: #4a5568;
+            --modal-overlay: rgba(0,0,0,0.8);
+            --banner-warning: #742a2a;            --banner-warning-border: #fc8181;
+            --banner-warning-text: #fed7d7;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7fafc;
-            color: #2d3748;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             padding-bottom: 80px;
+            transition: background-color 0.3s, color 0.3s;
         }
-
-        /* Cabeçalho */
         header {
-            background-color: #2d3748;
-            color: white;
+            background-color: var(--header-bg);
+            color: var(--header-text);
             padding: 16px;
             position: sticky;
             top: 0;
@@ -39,72 +69,89 @@
             align-items: center;
             gap: 8px;
         }
-
-        header > div:first-child { flex: 1; }
-
+        header > div:first-child { flex: 1; cursor: pointer; }
+        header > div:first-child:active { opacity: 0.8; }
         header button {
             background: rgba(255,255,255,0.1);
             border: none;
-            color: white;
+            color: var(--header-text);
             width: 40px;
-            height: 40px;            border-radius: 8px;
+            height: 40px;
+            border-radius: 8px;
             font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
         }
-
         header button:active { background: rgba(255,255,255,0.2); }
         header h1 { font-size: 1.25rem; font-weight: 600; }
         header p { font-size: 0.75rem; color: #a0aec0; }
-
-        /* Barra de busca */
+        .expiring-banner {
+            display: none;
+            background-color: var(--banner-warning);
+            border-left: 4px solid var(--banner-warning-border);
+            color: var(--banner-warning-text);
+            padding: 12px 16px;
+            margin: 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;        }
+        .expiring-banner h4 { font-size: 1rem; margin-bottom: 8px; }
+        .expiring-banner ul { list-style: none; }
+        .expiring-banner li {
+            padding: 4px 0;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .days-left {
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        .days-urgent { background-color: #fed7d7; color: #c53030; }
+        .days-warning { background-color: #faf089; color: #744210; }
+        .days-soon { background-color: #c6f6d5; color: #22543d; }
         .search-bar {
             position: sticky;
             top: 56px;
             z-index: 15;
-            background-color: white;
+            background-color: var(--bg-secondary);
             padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
         }
-
         .search-bar input {
             width: 100%;
             padding: 12px;
-            border: 1px solid #cbd5e0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
         }
-
-        /* Estatísticas */
         .stats {
             display: none;
-            background-color: white;
+            background-color: var(--bg-secondary);
             padding: 16px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
         }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
         }
-
         .stat-box { text-align: center; padding: 12px; border-radius: 8px; }
         .stat-active { background-color: #c6f6d5; }
         .stat-pending { background-color: #faf089; }
-        .stat-expired { background-color: #fed7d7; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; }
-        /* Botões principais */
+        .stat-expired { background-color: #fed7d7; }        .stat-value { font-size: 1.5rem; font-weight: bold; color: #2d3748; }
         .main-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             padding: 24px 16px;
         }
-
         .btn {
             padding: 16px;
             border-radius: 8px;
@@ -116,43 +163,53 @@
             justify-content: center;
             gap: 8px;
         }
-
         .btn-primary { background-color: #3182ce; color: white; }
         .btn-secondary { background-color: #718096; color: white; }
-
-        /* Lista de visitantes */
         #visitorsList { padding: 16px; }
-
         .visitor-card {
-            background-color: white;
+            background-color: var(--bg-secondary);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px var(--card-shadow);
             border-left-width: 4px;
             border-left-style: solid;
-            position: relative;
+            cursor: pointer;
         }
-
+        .visitor-card:active { transform: scale(0.98); }
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 8px;
         }
-
         .card-info { flex-grow: 1; }
         .card-info h3 { font-size: 1.1rem; font-weight: 600; }
-        .card-info p { font-size: 0.9rem; color: #4a5568; }
-
-        .dates-row {            display: flex;
+        .card-info p { font-size: 0.9rem; color: var(--text-secondary); }
+        .unit-resident { display: flex; gap: 12px; margin-bottom: 4px; }
+        .unit-badge {
+            background-color: var(--border-color);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }        .resident-name { color: var(--text-secondary); font-size: 0.85rem; }
+        .vehicle-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .dates-row {
+            display: flex;
             justify-content: space-between;
             font-size: 0.85rem;
             margin-bottom: 8px;
         }
-
         .dates-row span { font-weight: 500; }
-
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -167,10 +224,8 @@
         .status-pending { background-color: #faf089; color: #744210; }
         .status-expired { background-color: #fed7d7; color: #742a2a; }
         .status-free { background-color: #d3d3d3; color: #2f2f2f; }
-        .status-trash { background-color: #e2e8f0; color: #4a5568; }
-
+        .status-trash { background-color: var(--border-color); color: var(--text-secondary); }
         .card-actions { display: flex; gap: 8px; }
-
         .action-btn {
             width: 40px;
             height: 40px;
@@ -180,74 +235,121 @@
             justify-content: center;
             font-size: 1.2rem;
             cursor: pointer;
+            background-color: var(--border-color);
         }
-
-        .action-edit { background-color: #e2e8f0; }
         .action-delete { background-color: #fed7d7; color: #c53030; }
         .action-restore { background-color: #c6f6d5; color: #22543d; }
-
-        .notes { font-size: 0.85rem; color: #718096; margin-top: 8px; }
-
-        /* Modal */
+        .notes { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);            z-index: 100;
+            top: 0; left: 0;            width: 100%; height: 100%;
+            background-color: var(--modal-overlay);
+            z-index: 100;
             align-items: center;
             justify-content: center;
         }
-
         .modal-content {
-            background-color: white;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
             width: 90%;
             max-width: 500px;
+            max-height: 90vh;
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
         }
-
         .modal-title { font-size: 1.5rem; font-weight: 600; }
-        .modal-close { font-size: 1.5rem; cursor: pointer; background: none; border: none; }
-
-        .form-group { margin-bottom: 16px; }
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+        }
+        .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; font-weight: 500; }
         .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e0;
+            padding: 10px;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
         }
-
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .form-checkbox { display: flex; align-items: center; gap: 8px; }
-
-        .modal-buttons { display: flex; gap: 12px; margin-top: 24px; }
+        .form-section {
+            background-color: var(--bg-section);
+            padding: 10px;
+            border-radius: 8px;            margin-bottom: 12px;
+        }
+        .form-section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
         .btn-modal-cancel {
-            flex: 1; padding: 12px;
-            background-color: #e2e8f0; color: #4a5568;
-            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            flex: 1;
+            padding: 12px;
+            background-color: var(--border-color);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
         .btn-modal-save {
-            flex: 1; padding: 12px;
-            background-color: #3182ce; color: white;
-            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            flex: 1;
+            padding: 12px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
-
-        /* FAB */        .fab {
+        .view-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .view-row:last-child { border-bottom: none; }
+        .view-label { font-weight: 600; color: var(--text-secondary); }
+        .view-value { color: var(--text-primary); text-align: right; }
+        .backup-warning {
+            background-color: #fff5f5;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #f56565;
+            margin-top: 16px;
+        }
+        .backup-warning p {            font-size: 0.85rem;
+            color: #742a2a;
+        }
+        .fab {
             position: fixed;
             bottom: 100px;
             right: 20px;
-            width: 60px; height: 60px;
+            width: 60px;
+            height: 60px;
             background-color: #3182ce;
             color: white;
             border-radius: 50%;
@@ -259,19 +361,18 @@
             cursor: pointer;
             z-index: 40;
         }
-
-        /* Navegação inferior */
         nav {
             position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background-color: white;
-            border-top: 1px solid #e2e8f0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--nav-bg);
+            border-top: 1px solid var(--nav-border);
             padding: 12px 0;
             display: flex;
             justify-content: space-around;
             z-index: 30;
         }
-
         .nav-btn {
             display: flex;
             flex-direction: column;
@@ -280,133 +381,164 @@
             font-size: 0.7rem;
             font-weight: 500;
             cursor: pointer;
+            color: var(--text-secondary);
         }
         .nav-btn.active { color: #3182ce; }
-
-        /* Estados visuais */
         .expired { border-left-color: #e53e3e; }
-        .active   { border-left-color: #38a169; }
-        .pending  { border-left-color: #d69e2e; }
-        .free     { border-left-color: #4299e1; }
-        .trash    { border-left-color: #718096; }
-
-        /* Estado vazio */
+        .active { border-left-color: #38a169; }
+        .pending { border-left-color: #d69e2e; }
+        .free { border-left-color: #4299e1; }
+        .trash { border-left-color: #718096; }
         .empty-state { text-align: center; padding: 48px 16px; }
-        .empty-state h3 { font-size: 1.25rem; margin-bottom: 8px; }        .empty-state p { color: #718096; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 1.25rem; margin-bottom: 8px; }        .empty-state p { color: var(--text-muted); margin-bottom: 16px; }
         .btn-empty {
-            background-color: #3182ce; color: white;
-            padding: 12px 24px; border-radius: 8px;
-            font-weight: 600; cursor: pointer;
+            background-color: #3182ce;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-
     <header>
-        <div>
-            <h1 id="pageTitle">Controle de Visitantes</h1>
-            <p id="pageSubtitle">Sistema de Liberação</p>
+        <div onclick="location.reload()">
+            <h1>Controle de Visitantes 🔄</h1>
+            <p>Sistema de Liberação</p>
         </div>
         <button id="toggleStatsBtn">📊</button>
-        <button id="backupBtn" style="margin-left: 8px;">💾</button>
+        <button id="toggleThemeBtn">🌙</button>
+        <button id="backupBtn">💾</button>
     </header>
 
+    <div id="expiringBanner" class="expiring-banner">
+        <h4>⚠️ Atenção: Autorizações Vencendo em Breve!</h4>
+        <ul id="expiringList"></ul>
+    </div>
+
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Buscar visitante ou apartamento...">
+        <input type="text" id="searchInput" placeholder="Buscar visitante...">
     </div>
 
     <div id="statsSection" class="stats">
         <div class="stats-grid">
-            <div class="stat-box stat-active">
-                <div id="activeCount" class="stat-value">0</div>
-                <div>Ativos</div>
-            </div>
-            <div class="stat-box stat-pending">
-                <div id="pendingCount" class="stat-value">0</div>
-                <div>Pendentes</div>
-            </div>
-            <div class="stat-box stat-expired">
-                <div id="expiredCount" class="stat-value">0</div>
-                <div>Vencidos</div>
-            </div>
+            <div class="stat-box stat-active"><div id="activeCount" class="stat-value">0</div><div>Ativos</div></div>
+            <div class="stat-box stat-pending"><div id="pendingCount" class="stat-value">0</div><div>Pendentes</div></div>
+            <div class="stat-box stat-expired"><div id="expiredCount" class="stat-value">0</div><div>Vencidos</div></div>
         </div>
     </div>
 
     <div class="main-buttons">
-        <button class="btn btn-primary" id="showAddModalBtn">
-            <span>➕</span> <span>Nova Liberação</span>
-        </button>
-        <button class="btn btn-secondary" id="showFilterModalBtn">
-            <span>🔍</span> <span>Filtrar</span>
-        </button>
+        <button class="btn btn-primary" id="showAddModalBtn">➕ Nova Liberação</button>
+        <button class="btn btn-secondary" id="showFilterModalBtn">🔍 Filtrar</button>
     </div>
 
     <div id="visitorsList"></div>
+
     <div id="emptyState" class="empty-state">
         <div>📝</div>
-        <h3 id="emptyStateTitle">Nenhuma liberação registrada</h3>
-        <p id="emptyStateText">Comece registrando uma nova liberação de visitante</p>
-        <button class="btn-empty" id="addFirstBtn">Adicionar Primeira Liberação</button>
+        <h3>Nenhuma liberação registrada</h3>
+        <p>Comece registrando uma nova liberação</p>        <button class="btn-empty" id="addFirstBtn">Adicionar Primeira</button>
     </div>
 
     <div class="fab" id="fabAddBtn">➕</div>
 
     <nav>
-        <div class="nav-btn" id="navAllBtn"><span>📋</span><span>Todos</span></div>
-        <div class="nav-btn" id="navActiveBtn"><span>✅</span><span>Ativos</span></div>
-        <div class="nav-btn" id="navPendingBtn"><span>⏳</span><span>Pendentes</span></div>
-        <div class="nav-btn" id="navExpiredBtn"><span>⚠️</span><span>Vencidos</span></div>
-        <div class="nav-btn" id="navTrashBtn"><span>🗑️</span><span>Lixeira</span></div>
+        <div class="nav-btn active" data-view="main" data-filter="all">📋 Todos</div>
+        <div class="nav-btn" data-view="main" data-filter="active">✅ Ativos</div>
+        <div class="nav-btn" data-view="main" data-filter="pending">⏳ Pendentes</div>
+        <div class="nav-btn" data-view="main" data-filter="expired">⚠️ Vencidos</div>
+        <div class="nav-btn" data-view="trash">🗑️ Lixeira</div>
     </nav>
 
     <div id="addModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Nova Liberação</h2>
-                <button class="modal-close" id="closeModalBtn">&times;</button>
+                <button class="modal-close" id="closeModalBtn">×</button>
             </div>
             <form id="addForm">
-                <div class="form-group">
-                    <label for="visitorName">Nome do Visitante</label>
-                    <input type="text" id="visitorName" required>
-                </div>
-                <div class="form-group">
-                    <label for="apartment">Apartamento / Morador</label>
-                    <input type="text" id="apartment" required>
-                </div>
-                <div class="form-row">
+                <div class="form-section">
+                    <div class="form-section-title">👤 Visitante</div>
                     <div class="form-group">
-                        <label for="entryDate">Data Entrada</label>
-                        <input type="date" id="entryDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="exitDate">Data Saída</label>
-                        <input type="date" id="exitDate" required>
+                        <label>Nome</label>
+                        <input type="text" id="visitorName" required>
                     </div>
                 </div>
-                <div class="form-group form-checkbox">
-                    <input type="checkbox" id="noExitDate">
-                    <label for="noExitDate">Sem data de saída</label>
+                <div class="form-section">
+                    <div class="form-section-title">🏢 Unidade</div>
+                    <div class="form-group">
+                        <label>Apartamento</label>
+                        <input type="text" id="unit" placeholder="Ex: B - 0726" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Morador</label>
+                        <input type="text" id="resident" placeholder="Ex: João Silva">
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-title">🚗 Veículo</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Placa</label>
+                            <input type="text" id="vehiclePlate" placeholder="ABC-1234">
+                        </div>
+                        <div class="form-group">
+                            <label>Modelo</label>
+                            <input type="text" id="vehicleModel" placeholder="HB20">
+                        </div>
+                    </div>                </div>
+                <div class="form-section">
+                    <div class="form-section-title">📅 Período</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Entrada</label>
+                            <input type="date" id="entryDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Saída</label>
+                            <input type="date" id="exitDate" required>
+                        </div>
+                    </div>
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="noExitDate">
+                        <label>Sem data de saída</label>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="notes">Observações (Opcional)</label>
-                    <textarea id="notes" rows="3"></textarea>                </div>
+                    <label>Observações</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
                 <div class="modal-buttons">
                     <button type="button" class="btn-modal-cancel" id="cancelModalBtn">Cancelar</button>
-                    <button type="submit" class="btn-modal-save" id="saveModalBtn">Salvar</button>
+                    <button type="submit" class="btn-modal-save">Salvar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📋 Detalhes</h2>
+                <button class="modal-close" id="closeViewModalBtn">×</button>
+            </div>
+            <div id="viewContent"></div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-modal-cancel" id="closeViewBtn2">Fechar</button>
+                <button type="button" class="btn-modal-save" id="editFromViewBtn">📝 Editar</button>
+            </div>
         </div>
     </div>
 
     <div id="filterModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Filtrar Liberações</h2>
-                <button class="modal-close" id="closeFilterModalBtn">&times;</button>
-            </div>
-            <div class="form-group">
-                <label for="filterStatus">Status</label>
+                <h2 class="modal-title">Filtrar</h2>
+                <button class="modal-close" id="closeFilterModalBtn">×</button>
+            </div>            <div class="form-group">
+                <label>Status</label>
                 <select id="filterStatus">
                     <option value="all">Todos</option>
                     <option value="active">Ativos</option>
@@ -415,10 +547,6 @@
                     <option value="free">Livre</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="filterApartment">Apartamento</label>
-                <input type="text" id="filterApartment" placeholder="Ex: 112">
-            </div>
             <div class="modal-buttons">
                 <button type="button" class="btn-modal-cancel" id="clearFilterBtn">Limpar</button>
                 <button type="button" class="btn-modal-save" id="applyFilterBtn">Aplicar</button>
@@ -426,85 +554,72 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE BACKUP COM IDs NAS SEÇÕES -->
     <div id="backupModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">💾 Backup de Dados</h2>
-                <button class="modal-close" id="closeBackupModalBtn">&times;</button>
+                <button class="modal-close" id="closeBackupModalBtn">×</button>
             </div>
             <div style="margin-bottom: 16px;">
-                <p style="color: #4a5568; margin-bottom: 16px;">Proteja seus dados fazendo backup regularmente!</p>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Proteja seus dados fazendo backup regularmente!</p>
                 
-                <!-- ✅ BACKUP PRINCIPAL (Visitantes Ativos) -->
                 <div id="mainBackupSection">
                     <button class="btn btn-primary" id="downloadBackupBtn" style="width: 100%; margin-bottom: 12px;">📥 Backup Visitantes (Baixar)</button>
-                    <button class="btn btn-secondary" id="uploadBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Visitantes</button>                    <button class="btn btn-secondary" id="saveToDriveBtn" style="width: 100%; margin-bottom: 12px;">🟢 Salvar Visitantes no Google Drive</button>
+                    <button class="btn btn-secondary" id="uploadBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Visitantes</button>
+                    <button class="btn btn-secondary" id="saveToDriveBtn" style="width: 100%; margin-bottom: 12px;">🟢 Salvar Visitantes no Google Drive</button>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">⏰ Backup automático ativado (5 min)</p>
                 </div>
                 
-                <hr id="backupDivider" style="margin: 16px 0; border: 1px solid #e2e8f0;">
+                <hr id="backupDivider" style="margin: 16px 0; border: 1px solid var(--border-color);">
                 
-                <!-- ✅ BACKUP DA LIXEIRA (Visitantes Excluídos) -->
                 <div id="trashBackupSection">
                     <button class="btn btn-secondary" id="downloadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">🗑️ Backup Lixeira (Baixar)</button>
                     <button class="btn btn-secondary" id="uploadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Lixeira</button>
                     <button class="btn btn-secondary" id="saveTrashToDriveBtn" style="width: 100%;">🟢 Salvar Lixeira no Google Drive</button>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">⏰ Backup automático ativado (5 min)</p>
                 </div>
                 
                 <input type="file" id="fileInput" accept=".json" style="display: none;">
                 <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
                 <input type="file" id="restoreTrashFileInput" accept=".json" style="display: none;">
             </div>
-            <div style="background-color: #fff5f5; padding: 12px; border-radius: 8px; border-left: 4px solid #f56565;">
-                <p style="font-size: 0.85rem; color: #742a2a;">
-                    <strong>⚠️ Importante:</strong> Ao restaurar um backup, os dados atuais serão substituídos.
-                </p>
+            <div class="backup-warning">
+                <p><strong>⚠️ Importante:</strong> Ao restaurar um backup, os dados atuais serão substituídos.</p>
             </div>
-        </div>
-    </div>
+        </div>    </div>
 
     <script>
-        // --- Configuração do Google Drive ---
+        const STORAGE_KEY = 'visitors_app_data';
+        const TRASH_STORAGE_KEY = 'visitors_app_trash_data';
         const GOOGLE_DRIVE_FILE_NAME = 'backup-visitantes.json';
         const GOOGLE_DRIVE_TRASH_FILE_NAME = 'backup-lixeria.json';
         const CLIENT_ID = '904521449655-icpbravdktcq7u6odhqlnvc7adimegmu.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-        let gapiInited = false;
-        let gisInited = false;
+        let visitors = [];
+        let trashVisitors = [];
+        let currentFilter = 'all';
+        let currentView = 'main';
+        let editingId = null;
+        let viewingId = null;
         let driveFileId = null;
         let driveTrashFileId = null;
+        let gapiInited = false;
+        let gisInited = false;
+        
+        // ✅ AUTO-BACKUP DEBOUNCE 5 MINUTOS
+        let autoBackupTimer = null;
+        const AUTO_BACKUP_DELAY = 5 * 60 * 1000; // 5 minutos
 
-        const loadGoogleScripts = () => {
-            const gapiScript = document.createElement('script');
-            gapiScript.src = 'https://apis.google.com/js/api.js';
-            gapiScript.onload = () => gapi.load('client', initializeGapi);
-            document.head.appendChild(gapiScript);
-
-            const gisScript = document.createElement('script');
-            gisScript.src = 'https://accounts.google.com/gsi/client';
-            gisScript.onload = () => gisInited = true;
-            document.head.appendChild(gisScript);
-        };
-
-        const initializeGapi = async () => {
-            try {                await gapi.client.init({ apiKey: null });
-                gapiInited = true;
-            } catch (error) {
-                console.error('Erro ao inicializar gapi:', error);
-            }
-        };
-
-        // --- Dados e Estados ---
-        const STORAGE_KEY = 'visitors_app_data';
-        const TRASH_STORAGE_KEY = 'visitors_app_trash_data';
+        const $ = id => document.getElementById(id);
+        const $$ = sel => document.querySelectorAll(sel);
 
         function loadAndCleanVisitors() {
-            let visitors = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            let trashVisitors = JSON.parse(localStorage.getItem(TRASH_STORAGE_KEY)) || [];
-            const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000;
+            visitors = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            trashVisitors = JSON.parse(localStorage.getItem(TRASH_STORAGE_KEY)) || [];
             const now = new Date();
             const nowStr = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0];
+            const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
             visitors = visitors.filter(v => {
                 if (!v || typeof v !== 'object') return false;
@@ -513,192 +628,237 @@
                 if (isNaN(exitDate.getTime())) return false;
                 if (v.exitDate < nowStr) {
                     const diffTime = new Date(nowStr) - exitDate;
-                    if (diffTime > THIRTY_DAYS_IN_MS) {
+                    if (diffTime >= THIRTY_DAYS_MS) {
                         trashVisitors.push(v);
                         return false;
                     }
                 }
                 return true;
             });
-
             localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
             localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
-            return { visitors, trashVisitors };
         }
 
-        let { visitors, trashVisitors } = loadAndCleanVisitors();
-        let currentFilter = 'all';
-        let currentApartmentFilter = '';
-        let editingId = null;
-        let currentView = 'main';
-
-        const $ = selector => document.querySelector(selector);
-        const $all = selector => document.querySelectorAll(selector);
-
-        const visitorsListEl = $('#visitorsList');
-        const emptyStateEl = $('#emptyState');
-        const statsSectionEl = $('#statsSection');        const activeCountEl = $('#activeCount');
-        const pendingCountEl = $('#pendingCount');
-        const expiredCountEl = $('#expiredCount');
-        const searchInputEl = $('#searchInput');
-        const pageTitleEl = $('#pageTitle');
-        const pageSubtitleEl = $('#pageSubtitle');
-        const emptyStateTitleEl = $('#emptyStateTitle');
-        const emptyStateTextEl = $('#emptyStateText');
-        const addFirstBtn = $('#addFirstBtn');
-        const showAddModalBtn = $('#showAddModalBtn');
-        const fabAddBtn = $('#fabAddBtn');
-        const modalEl = $('#addModal');
-        const modalTitleEl = $('#modalTitle');
-        const addFormEl = $('#addForm');
-        const filterModalEl = $('#filterModal');
-        const backupModalEl = $('#backupModal');
-
-        const formatDate = (dateStr) => {
-            if (!dateStr) return 'Saída livre';
-            const [year, month, day] = dateStr.split('-');
-            return `${day}/${month}/${year}`;
+        const formatDate = d => {
+            if (!d) return 'Saída livre';
+            const [y, m, day] = d.split('-');
+            return `${day}/${m}/${y}`;
         };
 
         const today = () => new Date().toISOString().split('T')[0];
 
-        const getStatus = (visitor) => {
+        const getStatus = v => {
             if (currentView === 'trash') return 'trash';
-            if (!visitor.exitDate) return 'free';
-            const todayStr = today();
-            if (visitor.exitDate < todayStr) return 'expired';
-            if (visitor.exitDate === todayStr) return 'pending';
+            if (!v.exitDate) return 'free';
+            const t = today();
+            if (v.exitDate < t) return 'expired';
+            if (v.exitDate === t) return 'pending';
             return 'active';
         };
 
-        const getStatusLabel = (status) => ({ active: 'Ativo', pending: 'Pendente', expired: 'Vencido', free: 'Livre', trash: 'Na Lixeira' })[status] || 'Desconhecido';
-        const getStatusClass = (status) => ({ active: 'status-active', pending: 'status-pending', expired: 'status-expired', free: 'status-free', trash: 'status-trash' })[status];
-        const getStatusIcon = (status) => ({ active: '✅', pending: '⏳', expired: '⚠️', free: '🔷', trash: '🗑️' })[status];
+        const getStatusLabel = s => ({active:'Ativo',pending:'Pendente',expired:'Vencido',free:'Livre',trash:'Lixeira'})[s] || '';
+        const getStatusClass = s => ({active:'status-active',pending:'status-pending',expired:'status-expired',free:'status-free',trash:'status-trash'})[s];
+        const getStatusIcon = s => ({active:'✅',pending:'⏳',expired:'⚠️',free:'🔷',trash:'🗑️'})[s];
 
-        const renderVisitors = () => {
-            const search = searchInputEl.value.toLowerCase();
-            let html = '';
-            let counts = { active: 0, pending: 0, expired: 0, free: 0, trash: 0 };
-            let listToRender = currentView === 'trash' ? trashVisitors : visitors;
+        const checkExpiring = () => {
+            const todayDate = new Date(today());
+            const expiring = visitors.filter(v => {
+                if (!v.exitDate) return false;
+                const diffDays = Math.ceil((new Date(v.exitDate) - todayDate) / (1000*60*60*24));
+                return diffDays >= 0 && diffDays <= 7;
+            }).sort((a,b) => new Date(a.exitDate) - new Date(b.exitDate));
 
-            const filteredVisitors = listToRender.filter(v => {
-                const matchesFilter = currentFilter === 'all' || getStatus(v) === currentFilter;
-                const matchesApartment = currentApartmentFilter === '' || v.apartment.toLowerCase().includes(currentApartmentFilter.toLowerCase());
-                const matchesSearch = `${v.name} ${v.apartment}`.toLowerCase().includes(search);
-                return matchesFilter && matchesApartment && matchesSearch;
-            });
-            if (filteredVisitors.length === 0) {
-                visitorsListEl.innerHTML = '';
-                emptyStateEl.style.display = 'block';
-                return;
+            const banner = $('expiringBanner');
+            const list = $('expiringList');
+
+            if (expiring.length > 0) {
+                list.innerHTML = expiring.map(v => {
+                    const days = Math.ceil((new Date(v.exitDate) - todayDate) / (1000*60*60*24));
+                    let cls = 'days-soon', txt = days + ' dias';
+                    if (days === 0) { cls = 'days-urgent'; txt = 'HOJE!'; }
+                    else if (days <= 2) { cls = 'days-urgent'; }
+                    return `<li><span>📋 ${v.name}</span><span class="days-left ${cls}">${txt}</span></li>`;
+                }).join('');
+                banner.style.display = 'block';
+            } else {
+                banner.style.display = 'none';
             }
-            emptyStateEl.style.display = 'none';
+        };
+        const render = () => {
+            const search = $('searchInput').value.toLowerCase();
+            const list = currentView === 'trash' ? trashVisitors : visitors;
+            const filtered = list.filter(v => {
+                const s = getStatus(v);
+                const matchFilter = currentFilter === 'all' || s === currentFilter;
+                const matchSearch = (v.name + ' ' + (v.unit||'') + ' ' + (v.resident||'')).toLowerCase().includes(search);
+                return matchFilter && matchSearch;
+            });
 
-            filteredVisitors.forEach(v => {
-                const status = getStatus(v);
-                counts[status]++;
-                const statusLabel = getStatusLabel(status);
-                const statusClass = getStatusClass(status);
-                const statusIcon = getStatusIcon(status);
+            $('visitorsList').innerHTML = filtered.map(v => {
+                const s = getStatus(v);
+                const vehicle = v.vehicle && v.vehicle.plate ? `🚗 ${v.vehicle.plate}${v.vehicle.model?' | '+v.vehicle.model:''}` : '';
+                const actions = currentView === 'trash'
+                    ? `<button class="action-btn action-restore" onclick="event.stopPropagation();restoreVisitor(${v.id})">🔄</button>
+                       <button class="action-btn action-delete" onclick="event.stopPropagation();deleteVisitorPermanently(${v.id})">🗑️</button>`
+                    : `<button class="action-btn" onclick="event.stopPropagation();editVisitor(${v.id})">✏️</button>
+                       <button class="action-btn action-delete" onclick="event.stopPropagation();deleteVisitor(${v.id})">🗑️</button>`;
 
-                let actionButtons = '';
-                if (currentView === 'trash') {
-                    actionButtons = `<button class="action-btn action-restore" onclick="restoreVisitor(${v.id})">🔄</button><button class="action-btn action-delete" onclick="deleteVisitorPermanently(${v.id})">🗑️</button>`;
-                } else {
-                    actionButtons = `<button class="action-btn action-edit" onclick="editVisitor(${v.id})">✏️</button><button class="action-btn action-delete" onclick="deleteVisitor(${v.id})">🗑️</button>`;
-                }
-
-                html += `
-                    <div class="visitor-card ${status}">
+                return `
+                    <div class="visitor-card ${s}" onclick="showViewModal(${v.id})">
                         <div class="card-header">
                             <div class="card-info">
                                 <h3>${v.name}</h3>
-                                <p>${v.apartment}</p>
+                                <div class="unit-resident">
+                                    <span class="unit-badge">🏢 ${v.unit||''}</span>
+                                    ${v.resident ? `<span class="resident-name">👤 ${v.resident}</span>` : ''}
+                                </div>
+                                ${vehicle ? `<div class="vehicle-info">${vehicle}</div>` : ''}
                                 <div class="dates-row">
                                     <span>Entrada: ${formatDate(v.entryDate)}</span>
                                     <span>Saída: ${formatDate(v.exitDate)}</span>
                                 </div>
                             </div>
-                            <div class="card-actions">${actionButtons}</div>
+                            <div class="card-actions">${actions}</div>
                         </div>
-                        ${v.notes ? `<div class="notes">${v.notes}</div>` : ''}
-                        <div class="status-badge ${statusClass}">${statusIcon} ${statusLabel}</div>
+                        ${v.notes ? `<div class="notes">📝 ${v.notes}</div>` : ''}
+                        <div class="status-badge ${getStatusClass(s)}">${getStatusIcon(s)} ${getStatusLabel(s)}</div>
                     </div>`;
-            });
-            visitorsListEl.innerHTML = html;
+            }).join('');
+
+            $('emptyState').style.display = filtered.length ? 'none' : 'block';
+
             if (currentView === 'main') {
-                activeCountEl.textContent = counts.active;
-                pendingCountEl.textContent = counts.pending;
-                expiredCountEl.textContent = counts.expired;
-            }
+                const counts = {active:0,pending:0,expired:0};
+                filtered.forEach(v => { const s=getStatus(v); if(counts[s]!==undefined) counts[s]++; });
+                $('activeCount').textContent = counts.active;
+                $('pendingCount').textContent = counts.pending;
+                $('expiredCount').textContent = counts.expired;
+            }        };
+
+        const showViewModal = id => {
+            const list = currentView === 'trash' ? trashVisitors : visitors;
+            const v = list.find(x => x.id === id);
+            if (!v) return;
+            viewingId = id;
+            const s = getStatus(v);
+            $('viewContent').innerHTML = `
+                <div class="view-row"><span class="view-label">📛 Nome</span><span class="view-value">${v.name}</span></div>
+                <div class="view-row"><span class="view-label">🏢 Unidade</span><span class="view-value">${v.unit||'-'}</span></div>
+                <div class="view-row"><span class="view-label">👤 Morador</span><span class="view-value">${v.resident||'-'}</span></div>
+                <div class="view-row"><span class="view-label">📅 Entrada</span><span class="view-value">${formatDate(v.entryDate)}</span></div>
+                <div class="view-row"><span class="view-label">📅 Saída</span><span class="view-value">${formatDate(v.exitDate)}</span></div>
+                <div class="view-row"><span class="view-label">📊 Status</span><span class="view-value"><span class="status-badge ${getStatusClass(s)}">${getStatusIcon(s)} ${getStatusLabel(s)}</span></span></div>
+                ${v.vehicle && (v.vehicle.plate||v.vehicle.model) ? `<div class="view-row"><span class="view-label">🚗 Veículo</span><span class="view-value">${v.vehicle.plate||''} ${v.vehicle.model||''}</span></div>` : ''}
+                ${v.notes ? `<div class="view-row" style="display:block"><span class="view-label">📝 Observações</span><div class="view-value" style="text-align:left;margin-top:8px">${v.notes}</div></div>` : ''}
+            `;
+            $('viewModal').style.display = 'flex';
         };
 
-        const showBackupReminder = () => {
-            const toast = document.createElement('div');
-            toast.innerHTML = `💾 Dados salvos localmente.<br><small>Abra o menu 💾 para backup no Drive.</small>`;            toast.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#3182ce;color:white;padding:12px 16px;border-radius:8px;font-size:0.9rem;text-align:center;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.2);max-width:90%;`;
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.5s'; setTimeout(()=>document.body.removeChild(toast),500); }, 3000);
-        };
+        const hideViewModal = () => { $('viewModal').style.display = 'none'; viewingId = null; };
 
-        const saveVisitor = (data) => {
+        const saveVisitor = data => {
             if (editingId !== null) {
-                const index = visitors.findIndex(v => v.id === editingId);
-                if (index !== -1) visitors[index] = { ...data, id: editingId };
+                const idx = visitors.findIndex(v => v.id === editingId);
+                if (idx !== -1) visitors[idx] = { ...data, id: editingId };
                 editingId = null;
-            } else { visitors.push(data); }
+            } else {
+                visitors.push(data);
+            }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
-            renderVisitors();
-            if (editingId === null) showBackupReminder();
+            render();
+            checkExpiring();
+            scheduleAutoBackup(); // ✅ Agenda auto-backup
         };
 
-        const deleteVisitor = (id) => {
-            if (confirm("Deseja realmente excluir esta liberação? Ela será movida para a lixeira.")) {
-                const index = visitors.findIndex(v => v.id === id);
-                if (index !== -1) {
-                    const visitor = visitors.splice(index, 1)[0];
-                    trashVisitors.push(visitor);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
-                    localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
-                    renderVisitors();
-                }
-            }
-        };
-
-        const deleteVisitorPermanently = (id) => {
-            if (confirm("Deseja excluir permanentemente? Esta ação não pode ser desfeita.")) {
-                const index = trashVisitors.findIndex(v => v.id === id);
-                if (index !== -1) {
-                    trashVisitors.splice(index, 1);
-                    localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
-                    renderVisitors();
-                }
-            }
-        };
-
-        const restoreVisitor = (id) => {
-            const index = trashVisitors.findIndex(v => v.id === id);
-            if (index !== -1) {
-                const visitor = trashVisitors.splice(index, 1)[0];
-                visitors.push(visitor);
+        const deleteVisitor = id => {
+            if (!confirm('Excluir e mover para lixeira?')) return;
+            const idx = visitors.findIndex(v => v.id === id);
+            if (idx !== -1) {
+                trashVisitors.push(visitors.splice(idx, 1)[0]);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
                 localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
-                renderVisitors();
+                render();
+                checkExpiring();
+                scheduleAutoBackup(); // ✅ Agenda auto-backup
             }
         };
-        // --- Google Drive: buscar arquivo existente ---
-        const findExistingFile = async (accessToken, fileName) => {
-            const query = `name='${fileName}' and trashed=false`;
-            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
-                headers: { Authorization: `Bearer ${accessToken}` }
-            });
-            const data = await response.json();
-            return data.files && data.files.length > 0 ? data.files[0].id : null;
+        const deleteVisitorPermanently = id => {
+            if (!confirm('Excluir permanentemente?')) return;
+            const idx = trashVisitors.findIndex(v => v.id === id);
+            if (idx !== -1) {
+                trashVisitors.splice(idx, 1);
+                localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
+                render();
+                scheduleAutoBackup(); // ✅ Agenda auto-backup
+            }
         };
 
-        // ✅ BACKUP PRINCIPAL (Visitantes Ativos)
-        const saveToGoogleDrive = async () => {
+        const restoreVisitor = id => {
+            const idx = trashVisitors.findIndex(v => v.id === id);
+            if (idx !== -1) {
+                visitors.push(trashVisitors.splice(idx, 1)[0]);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
+                localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
+                render();
+                checkExpiring();
+                scheduleAutoBackup(); // ✅ Agenda auto-backup
+            }
+        };
+
+        const editVisitor = id => {
+            hideViewModal();
+            const v = visitors.find(x => x.id === id);
+            if (!v) return;
+            editingId = id;
+            $('visitorName').value = v.name;
+            $('unit').value = v.unit || '';
+            $('resident').value = v.resident || '';
+            $('vehiclePlate').value = v.vehicle?.plate || '';
+            $('vehicleModel').value = v.vehicle?.model || '';
+            $('entryDate').value = v.entryDate;
+            $('notes').value = v.notes || '';
+            if (v.exitDate === null) {
+                $('noExitDate').checked = true;
+                $('exitDate').disabled = true;
+                $('exitDate').required = false;
+            } else {
+                $('noExitDate').checked = false;
+                $('exitDate').disabled = false;
+                $('exitDate').value = v.exitDate;
+                $('exitDate').required = true;
+            }
+            $('modalTitle').textContent = 'Editar Liberação';
+            $('addModal').style.display = 'flex';
+        };
+
+        const toggleTheme = () => {            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            $('toggleThemeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+        };
+
+        const loadTheme = () => {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            $('toggleThemeBtn').textContent = saved === 'dark' ? '☀️' : '🌙';
+        };
+
+        // ✅ FUNÇÃO DE AUTO-BACKUP COM DEBOUNCE
+        const scheduleAutoBackup = () => {
+            clearTimeout(autoBackupTimer);
+            autoBackupTimer = setTimeout(() => {
+                autoSaveToDrive();
+            }, AUTO_BACKUP_DELAY);
+            console.log('⏰ Auto-backup agendado para 5 minutos');
+        };
+
+        // ✅ AUTO-SAVE GOOGLE DRIVE
+        const autoSaveToDrive = async () => {
+            console.log('🟢 Iniciando auto-backup no Google Drive...');
+            
             if (!gapiInited || !gisInited) {
-                alert('Carregando serviços do Google... Tente novamente em 2 segundos.');
+                console.log('❌ Google APIs não inicializadas');
                 return;
             }
 
@@ -709,15 +869,18 @@
                 scope: SCOPES,
                 callback: async (resp) => {
                     if (resp.error) {
-                        console.error('OAuth error:', resp);
-                        alert('Autenticação com Google falhou.');
+                        console.error('❌ OAuth error:', resp);
                         return;
                     }
 
                     const accessToken = resp.access_token;
 
                     if (!driveFileId) {
-                        driveFileId = await findExistingFile(accessToken, GOOGLE_DRIVE_FILE_NAME);
+                        const query = `name='${GOOGLE_DRIVE_FILE_NAME}' and trashed=false`;
+                        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
+                            headers: { Authorization: `Bearer ${accessToken}` }
+                        });
+                        const data = await response.json();                        driveFileId = data.files && data.files.length > 0 ? data.files[0].id : null;
                     }
 
                     const backupData = {
@@ -733,7 +896,8 @@
                     if (driveFileId) {
                         url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`;
                         method = 'PATCH';
-                        headers = {                            'Authorization': `Bearer ${accessToken}`,
+                        headers = {
+                            'Authorization': `Bearer ${accessToken}`,
                             'Content-Type': 'application/json'
                         };
                         body = blob;
@@ -756,14 +920,183 @@
                             if (result.id) {
                                 localStorage.setItem('googleDriveBackupFileId', result.id);
                             }
+                            console.log('✅ Auto-backup realizado com sucesso!');
+                        } else {
+                            console.error('❌ Erro no auto-backup:', result);
+                        }
+                    } catch (error) {
+                        console.error('❌ Erro de rede no auto-backup:', error);
+                    }
+                }
+            });
+            tokenClient.requestAccessToken({ prompt: '' });
+        };
+
+        const downloadBackup = () => {
+            const data = { version: '1.0', exportDate: new Date().toISOString(), visitors };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = GOOGLE_DRIVE_FILE_NAME;
+            a.click();
+            alert('✅ Backup de visitantes baixado!');
+        };
+
+        const downloadTrashBackup = () => {
+            const data = { version: '1.0', exportDate: new Date().toISOString(), trashVisitors };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = GOOGLE_DRIVE_TRASH_FILE_NAME;
+            a.click();
+            alert('✅ Backup da lixeira baixado!');
+        };
+
+        const restoreBackup = file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.visitors || !Array.isArray(data.visitors)) {
+                        alert('❌ Arquivo inválido!');
+                        return;
+                    }
+                    if (confirm('⚠️ Substituir visitantes atuais?')) {
+                        visitors = data.visitors;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
+                        render();
+                        checkExpiring();
+                        $('backupModal').style.display = 'none';
+                        alert('✅ Backup restaurado!');
+                    }
+                } catch(err) {
+                    alert('❌ Erro ao ler arquivo!');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        const restoreTrashBackup = file => {
+            const reader = new FileReader();
+            reader.onload = e => {                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.trashVisitors || !Array.isArray(data.trashVisitors)) {
+                        alert('❌ Arquivo inválido!');
+                        return;
+                    }
+                    if (confirm('⚠️ Substituir lixeira atual?')) {
+                        trashVisitors = data.trashVisitors;
+                        localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
+                        render();
+                        $('backupModal').style.display = 'none';
+                        alert('✅ Backup da lixeira restaurado!');
+                    }
+                } catch(err) {
+                    alert('❌ Erro ao ler arquivo!');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // Google Drive Init
+        const loadGoogleScripts = () => {
+            const gapiScript = document.createElement('script');
+            gapiScript.src = 'https://apis.google.com/js/api.js';
+            gapiScript.onload = () => gapi.load('client', async () => {
+                try {
+                    await gapi.client.init({ apiKey: null });
+                    gapiInited = true;
+                    console.log('✅ GAPI inicializado');
+                } catch (error) {
+                    console.error('❌ Erro ao inicializar GAPI:', error);
+                }
+            });
+            document.head.appendChild(gapiScript);
+
+            const gisScript = document.createElement('script');
+            gisScript.src = 'https://accounts.google.com/gsi/client';
+            gisScript.onload = () => {
+                gisInited = true;
+                console.log('✅ GIS inicializado');
+            };
+            document.head.appendChild(gisScript);
+        };
+
+        // Manual Google Drive Save
+        const saveToGoogleDrive = async () => {
+            console.log('🟢 Salvando no Google Drive (manual)...');
+            
+            if (!gapiInited || !gisInited) {
+                alert('Carregando serviços do Google... Tente em 2 segundos.');                return;
+            }
+
+            driveFileId = localStorage.getItem('googleDriveBackupFileId');
+
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: async (resp) => {
+                    if (resp.error) {
+                        console.error('OAuth error:', resp);
+                        alert('Autenticação falhou.');
+                        return;
+                    }
+
+                    const accessToken = resp.access_token;
+
+                    if (!driveFileId) {
+                        const query = `name='${GOOGLE_DRIVE_FILE_NAME}' and trashed=false`;
+                        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
+                            headers: { Authorization: `Bearer ${accessToken}` }
+                        });
+                        const data = await response.json();
+                        driveFileId = data.files && data.files.length > 0 ? data.files[0].id : null;
+                    }
+
+                    const backupData = {
+                        version: '1.0',
+                        exportDate: new Date().toISOString(),
+                        visitors: visitors
+                    };
+                    const fileContent = JSON.stringify(backupData, null, 2);
+                    const blob = new Blob([fileContent], { type: 'application/json' });
+
+                    let url, method, headers, body;
+
+                    if (driveFileId) {
+                        url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`;
+                        method = 'PATCH';
+                        headers = {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        };
+                        body = blob;
+                    } else {
+                        const metadata = { name: GOOGLE_DRIVE_FILE_NAME, mimeType: 'application/json' };
+                        const form = new FormData();
+                        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                        form.append('file', blob);
+                        url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';                        method = 'POST';
+                        headers = { 'Authorization': `Bearer ${accessToken}` };
+                        body = form;
+                    }
+
+                    try {
+                        const response = await fetch(url, { method, headers, body });
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            if (result.id) {
+                                localStorage.setItem('googleDriveBackupFileId', result.id);
+                            }
                             alert('✅ Backup de VISITANTES salvo com sucesso!\n\nArquivo: ' + GOOGLE_DRIVE_FILE_NAME);
                         } else {
                             console.error('Erro no upload:', result);
-                            alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || 'Erro desconhecido'));
+                            alert('❌ Falha ao salvar:\n' + (result.error?.message || 'Erro desconhecido'));
                         }
                     } catch (error) {
                         console.error('Erro de rede:', error);
-                        alert('❌ Erro de conexão com o Google Drive.');
+                        alert('❌ Erro de conexão.');
                     }
                 }
             });
@@ -771,10 +1104,9 @@
             tokenClient.requestAccessToken({ prompt: '' });
         };
 
-        // ✅ BACKUP DA LIXEIRA (Visitantes Excluídos)
         const saveTrashToGoogleDrive = async () => {
             if (!gapiInited || !gisInited) {
-                alert('Carregando serviços do Google... Tente novamente em 2 segundos.');
+                alert('Carregando serviços do Google... Tente em 2 segundos.');
                 return;
             }
 
@@ -782,17 +1114,22 @@
 
             const tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
-                scope: SCOPES,                callback: async (resp) => {
+                scope: SCOPES,
+                callback: async (resp) => {
                     if (resp.error) {
                         console.error('OAuth error:', resp);
-                        alert('Autenticação com Google falhou.');
+                        alert('Autenticação falhou.');
                         return;
                     }
 
                     const accessToken = resp.access_token;
 
                     if (!driveTrashFileId) {
-                        driveTrashFileId = await findExistingFile(accessToken, GOOGLE_DRIVE_TRASH_FILE_NAME);
+                        const query = `name='${GOOGLE_DRIVE_TRASH_FILE_NAME}' and trashed=false`;                        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
+                            headers: { Authorization: `Bearer ${accessToken}` }
+                        });
+                        const data = await response.json();
+                        driveTrashFileId = data.files && data.files.length > 0 ? data.files[0].id : null;
                     }
 
                     const backupData = {
@@ -831,14 +1168,14 @@
                         if (response.ok) {
                             if (result.id) {
                                 localStorage.setItem('googleDriveTrashFileId', result.id);
-                            }                            alert('✅ Backup da LIXEIRA salvo com sucesso no Google Drive!\n\nArquivo: ' + GOOGLE_DRIVE_TRASH_FILE_NAME);
+                            }
+                            alert('✅ Backup da LIXEIRA salvo com sucesso!\n\nArquivo: ' + GOOGLE_DRIVE_TRASH_FILE_NAME);
                         } else {
                             console.error('Erro no upload:', result);
-                            alert('❌ Falha ao salvar no Google Drive:\n' + (result.error?.message || 'Erro desconhecido'));
+                            alert('❌ Falha ao salvar:\n' + (result.error?.message || 'Erro desconhecido'));
                         }
-                    } catch (error) {
-                        console.error('Erro de rede:', error);
-                        alert('❌ Erro de conexão com o Google Drive.');
+                    } catch (error) {                        console.error('Erro de rede:', error);
+                        alert('❌ Erro de conexão.');
                     }
                 }
             });
@@ -846,243 +1183,111 @@
             tokenClient.requestAccessToken({ prompt: '' });
         };
 
-        // --- Modais ---
-        const showAddModal = () => {
-            modalTitleEl.textContent = 'Nova Liberação';
-            addFormEl.reset();
-            $('#noExitDate').checked = false;
-            $('#exitDate').disabled = false;
-            $('#exitDate').required = true;
-            editingId = null;
-            modalEl.style.display = 'flex';
-        };
-
-        const downloadBackup = () => {
-            const data = { version: '1.0', exportDate: new Date().toISOString(), visitors: visitors };
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = GOOGLE_DRIVE_FILE_NAME;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert('✅ Backup de visitantes baixado com sucesso!');
-        };
-
-        const downloadTrashBackup = () => {
-            const data = { version: '1.0', exportDate: new Date().toISOString(), trashVisitors: trashVisitors };
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = GOOGLE_DRIVE_TRASH_FILE_NAME;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert('✅ Backup da lixeira baixado com sucesso!');
-        };
-        const restoreBackup = (file) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (!data.visitors || !Array.isArray(data.visitors)) {
-                        alert('❌ Arquivo de backup inválido!');
-                        return;
-                    }
-                    if (confirm(`⚠️ Substituir visitantes atuais pelo backup?`)) {
-                        visitors = data.visitors;
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
-                        renderVisitors();
-                        backupModalEl.style.display = 'none';
-                        alert('✅ Backup de visitantes restaurado com sucesso!');
-                    }
-                } catch (error) {
-                    alert('❌ Erro ao ler arquivo de backup!');
-                    console.error(error);
-                }
-            };
-            reader.readAsText(file);
-        };
-
-        const restoreTrashBackup = (file) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (!data.trashVisitors || !Array.isArray(data.trashVisitors)) {
-                        alert('❌ Arquivo de backup da lixeira inválido!');
-                        return;
-                    }
-                    if (confirm(`⚠️ Substituir lixeira atual pelo backup?`)) {
-                        trashVisitors = data.trashVisitors;
-                        localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
-                        renderVisitors();
-                        backupModalEl.style.display = 'none';
-                        alert('✅ Backup da lixeira restaurado com sucesso!');
-                    }
-                } catch (error) {
-                    alert('❌ Erro ao ler arquivo de backup da lixeira!');
-                    console.error(error);
-                }
-            };
-            reader.readAsText(file);
-        };
-
-        const hideAddModal = () => { modalEl.style.display = 'none'; editingId = null; };
-        const showFilterModal = () => filterModalEl.style.display = 'flex';        const hideFilterModal = () => filterModalEl.style.display = 'none';
-        const hideBackupModal = () => { backupModalEl.style.display = 'none'; };
-
-        // ✅ NOVA FUNÇÃO: Mostrar modal com opções contextuais
-        const showBackupModal = () => {
-            const mainSection = document.getElementById('mainBackupSection');
-            const trashSection = document.getElementById('trashBackupSection');
-            const divider = document.getElementById('backupDivider');
-            
-            if (currentView === 'trash') {
-                mainSection.style.display = 'none';
-                divider.style.display = 'none';
-                trashSection.style.display = 'block';
-            } else {
-                mainSection.style.display = 'block';
-                divider.style.display = 'none';
-                trashSection.style.display = 'none';
-            }
-            
-            backupModalEl.style.display = 'flex';
-        };
-
-        const editVisitor = (id) => {
-            const visitor = visitors.find(v => v.id === id);
-            if (!visitor) return;
-            editingId = id;
-            $('#visitorName').value = visitor.name;
-            $('#apartment').value = visitor.apartment;
-            $('#entryDate').value = visitor.entryDate;
-            $('#notes').value = visitor.notes || '';
-            if (visitor.exitDate === null) {
-                $('#noExitDate').checked = true;
-                $('#exitDate').disabled = true;
-                $('#exitDate').required = false;
-            } else {
-                $('#noExitDate').checked = false;
-                $('#exitDate').disabled = false;
-                $('#exitDate').value = visitor.exitDate;
-                $('#exitDate').required = true;
-            }
-            modalTitleEl.textContent = 'Editar Liberação';
-            modalEl.style.display = 'flex';
-        };
-
-        // --- Eventos ---
+        // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
             loadGoogleScripts();
+            loadTheme();
+            loadAndCleanVisitors();
+            render();
+            checkExpiring();
 
-            $('#showAddModalBtn').addEventListener('click', showAddModal);
-            $('#fabAddBtn').addEventListener('click', showAddModal);            $('#addFirstBtn').addEventListener('click', showAddModal);
-            $('#closeModalBtn').addEventListener('click', hideAddModal);
-            $('#cancelModalBtn').addEventListener('click', hideAddModal);
-            $('#closeFilterModalBtn').addEventListener('click', hideFilterModal);
-            $('#closeBackupModalBtn').addEventListener('click', hideBackupModal);
-            
-            // ✅ EVENTO ATUALIZADO DO BOTÃO BACKUP
-            $('#backupBtn').addEventListener('click', showBackupModal);
-            
-            // ✅ Eventos do Backup Principal
-            $('#downloadBackupBtn').addEventListener('click', downloadBackup);
-            $('#uploadBackupBtn').addEventListener('click', () => $('#restoreFileInput').click());
-            $('#saveToDriveBtn').addEventListener('click', saveToGoogleDrive);
-            $('#restoreFileInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) { restoreBackup(file); e.target.value = ''; }
-            });
-            
-            // ✅ Eventos do Backup da Lixeira
-            $('#downloadTrashBackupBtn').addEventListener('click', downloadTrashBackup);
-            $('#uploadTrashBackupBtn').addEventListener('click', () => $('#restoreTrashFileInput').click());
-            $('#saveTrashToDriveBtn').addEventListener('click', saveTrashToGoogleDrive);
-            $('#restoreTrashFileInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) { restoreTrashBackup(file); e.target.value = ''; }
-            });
+            $('showAddModalBtn').onclick = () => {
+                editingId = null;
+                $('addForm').reset();
+                $('modalTitle').textContent = 'Nova Liberação';
+                $('exitDate').disabled = false;
+                $('exitDate').required = true;
+                $('addModal').style.display = 'flex';
+            };
 
-            addFormEl.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const noExit = $('#noExitDate').checked;
-                const exitDate = noExit ? null : $('#exitDate').value;
-                if (!noExit && !exitDate) { alert('Informe a data de saída ou marque "Sem data de saída".'); return; }
-                const visitorData = {
-                    name: $('#visitorName').value.trim(),
-                    apartment: $('#apartment').value.trim(),
-                    entryDate: $('#entryDate').value,
+            $('fabAddBtn').onclick = $('showAddModalBtn').onclick;
+            $('addFirstBtn').onclick = $('showAddModalBtn').onclick;
+            $('closeModalBtn').onclick = () => $('addModal').style.display = 'none';
+            $('cancelModalBtn').onclick = () => $('addModal').style.display = 'none';
+            $('closeViewModalBtn').onclick = hideViewModal;
+            $('closeViewBtn2').onclick = hideViewModal;
+            $('closeFilterModalBtn').onclick = () => $('filterModal').style.display = 'none';
+            $('closeBackupModalBtn').onclick = () => $('backupModal').style.display = 'none';
+            $('toggleThemeBtn').onclick = toggleTheme;
+            $('toggleStatsBtn').onclick = () => {
+                $('statsSection').style.display = $('statsSection').style.display === 'none' ? 'block' : 'none';
+            };
+
+            $('backupBtn').onclick = () => {
+                $('mainBackupSection').style.display = currentView === 'trash' ? 'none' : 'block';
+                $('backupDivider').style.display = currentView === 'trash' ? 'none' : 'block';
+                $('trashBackupSection').style.display = currentView === 'trash' ? 'block' : 'none';
+                $('backupModal').style.display = 'flex';
+            };
+
+            $('editFromViewBtn').onclick = () => { if (viewingId) editVisitor(viewingId); };
+
+            $('addForm').onsubmit = e => {
+                e.preventDefault();                const noExit = $('noExitDate').checked;
+                const exitDate = noExit ? null : $('exitDate').value;
+                if (!noExit && !exitDate) { alert('Informe data de saída'); return; }
+                const data = {
+                    name: $('visitorName').value.trim(),
+                    unit: $('unit').value.trim(),
+                    resident: $('resident').value.trim(),
+                    vehicle: { plate: $('vehiclePlate').value.trim().toUpperCase(), model: $('vehicleModel').value.trim() },
+                    entryDate: $('entryDate').value,
                     exitDate: exitDate,
-                    notes: $('#notes').value.trim()
+                    notes: $('notes').value.trim()
                 };
-                visitorData.id = editingId !== null ? editingId : Date.now();
-                saveVisitor(visitorData);
-                hideAddModal();
-            });
-
-            $('#noExitDate').addEventListener('change', (e) => {
-                const exitDateInput = $('#exitDate');
-                exitDateInput.disabled = e.target.checked;
-                if (e.target.checked) { exitDateInput.value = ''; exitDateInput.required = false; }
-                else { exitDateInput.required = true; }
-            });
-            searchInputEl.addEventListener('input', renderVisitors);
-            $('#toggleStatsBtn').addEventListener('click', () => {
-                statsSectionEl.style.display = statsSectionEl.style.display === 'none' ? 'block' : 'none';
-            });
-
-            const setActiveNav = (btnId) => {
-                $all('.nav-btn').forEach(btn => btn.classList.remove('active'));
-                $(btnId).classList.add('active');
+                if (!data.vehicle.plate && !data.vehicle.model) delete data.vehicle;
+                data.id = editingId !== null ? editingId : Date.now();
+                saveVisitor(data);
+                $('addModal').style.display = 'none';
             };
 
-            const updateView = (view, filter, title, subtitle, emptyTitle, emptyText, showMainButtons, showFab) => {
-                currentView = view; currentFilter = filter; currentApartmentFilter = '';
-                pageTitleEl.textContent = title; pageSubtitleEl.textContent = subtitle;
-                emptyStateTitleEl.textContent = emptyTitle; emptyStateTextEl.textContent = emptyText;
-                document.querySelector('.main-buttons').style.display = showMainButtons ? 'grid' : 'none';
-                document.querySelector('.fab').style.display = showFab ? 'flex' : 'none';
-                $('#filterStatus').value = filter; $('#filterApartment').value = '';
-                renderVisitors();
-                const navMap = { 'main-all':'#navAllBtn','main-active':'#navActiveBtn','main-pending':'#navPendingBtn','main-expired':'#navExpiredBtn','trash':'#navTrashBtn' };
-                setActiveNav(navMap[`${view}-${filter}`] || '#navAllBtn');
+            $('noExitDate').onchange = e => {
+                $('exitDate').disabled = e.target.checked;
+                $('exitDate').required = !e.target.checked;
+                if (e.target.checked) $('exitDate').value = '';
             };
 
-            $('#navAllBtn').addEventListener('click', () => updateView('main','all','Controle de Visitantes','Todos','Nenhuma liberação registrada','Comece registrando uma nova liberação de visitante',true,true));
-            $('#navActiveBtn').addEventListener('click', () => updateView('main','active','Controle de Visitantes','Ativos','Nenhuma liberação ativa','Não há visitantes com status ativo no momento.',true,true));
-            $('#navPendingBtn').addEventListener('click', () => updateView('main','pending','Controle de Visitantes','Pendentes','Nenhuma liberação pendente','Não há visitantes com status pendente no momento.',true,true));
-            $('#navExpiredBtn').addEventListener('click', () => updateView('main','expired','Controle de Visitantes','Vencidos','Nenhuma liberação vencida','Não há visitantes com status vencido no momento.',true,true));
-            $('#navTrashBtn').addEventListener('click', () => updateView('trash','all','Lixeira de Visitantes','Excluídos','Lixeira vazia','Não há visitantes excluídos no momento.',false,false));
+            $('searchInput').oninput = render;
 
-            $('#showFilterModalBtn').addEventListener('click', showFilterModal);
-            $('#applyFilterBtn').addEventListener('click', () => {
-                currentFilter = $('#filterStatus').value;
-                currentApartmentFilter = $('#filterApartment').value.trim();
-                renderVisitors(); hideFilterModal();
-            });
-            $('#clearFilterBtn').addEventListener('click', () => {
-                $('#filterStatus').value = 'all'; $('#filterApartment').value = '';
-                currentFilter = 'all'; currentApartmentFilter = '';
-                renderVisitors(); hideFilterModal();
+            $$('.nav-btn').forEach(btn => {
+                btn.onclick = () => {
+                    $$('.nav-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentView = btn.dataset.view || 'main';
+                    currentFilter = btn.dataset.filter || 'all';
+                    render();
+                    checkExpiring();
+                };
             });
 
-            updateView('main','all','Controle de Visitantes','Todos','Nenhuma liberação registrada','Comece registrando uma nova liberação de visitante',true,true);
+            $('showFilterModalBtn').onclick = () => $('filterModal').style.display = 'flex';
+            $('applyFilterBtn').onclick = () => {
+                currentFilter = $('filterStatus').value;
+                $('filterModal').style.display = 'none';
+                render();
+            };
+            $('clearFilterBtn').onclick = () => {
+                $('filterStatus').value = 'all';
+                currentFilter = 'all';
+                $('filterModal').style.display = 'none';
+                render();
+            };
+            // Backup buttons
+            $('downloadBackupBtn').onclick = downloadBackup;
+            $('downloadTrashBackupBtn').onclick = downloadTrashBackup;
+            $('uploadBackupBtn').onclick = () => $('restoreFileInput').click();
+            $('uploadTrashBackupBtn').onclick = () => $('restoreTrashFileInput').click();
+            $('restoreFileInput').onchange = e => { if(e.target.files[0]) restoreBackup(e.target.files[0]); };
+            $('restoreTrashFileInput').onchange = e => { if(e.target.files[0]) restoreTrashBackup(e.target.files[0]); };
+            $('saveToDriveBtn').onclick = saveToGoogleDrive;
+            $('saveTrashToDriveBtn').onclick = saveTrashToGoogleDrive;
         });
 
-        // --- Service Worker ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registrado:', reg.scope))
-                    .catch(err => console.error('Erro ao registrar SW:', err));            });
+                navigator.serviceWorker.register('./sw.js').catch(console.error);
+            });
         }
-
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (!refreshing) { refreshing = true; window.location.reload(); }
-        });
     </script>
 </body>
 </html>
