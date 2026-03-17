@@ -194,7 +194,10 @@
             gap: 12px;
             padding: 24px 16px;
         }
-        .btn {            padding: 16px;
+        .main-buttons.hide {            display: none;
+        }
+        .btn {
+            padding: 16px;
             border-radius: 8px;
             font-weight: 600;
             text-align: center;
@@ -240,10 +243,10 @@
         .vehicle-info {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
+            gap: 6px;            font-size: 0.85rem;
             color: var(--text-secondary);
-            margin-top: 4px;        }
+            margin-top: 4px;
+        }
         .dates-row {
             display: flex;
             justify-content: space-between;
@@ -289,10 +292,10 @@
             background-color: var(--modal-overlay);
             z-index: 100;
             align-items: center;
-            justify-content: center;
-        }
+            justify-content: center;        }
         .modal-content {
-            background-color: var(--bg-secondary);            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
             width: 90%;
             max-width: 500px;
             max-height: 90vh;
@@ -338,10 +341,10 @@
         }
         .form-section-title {
             font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-weight: 600;            color: var(--text-secondary);
             margin-bottom: 10px;
-        }        .modal-buttons {
+        }
+        .modal-buttons {
             display: flex;
             gap: 12px;
             margin-top: 16px;
@@ -387,10 +390,10 @@
             color: #742a2a;
         }
         .fab {
-            position: fixed;
-            bottom: 100px;
+            position: fixed;            bottom: 100px;
             right: 20px;
-            width: 60px;            height: 60px;
+            width: 60px;
+            height: 60px;
             background-color: #3182ce;
             color: white;
             border-radius: 50%;
@@ -436,10 +439,10 @@
         .btn-empty {
             background-color: #3182ce;
             color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 12px 24px;            border-radius: 8px;
             font-weight: 600;
-            cursor: pointer;        }
+            cursor: pointer;
+        }
         .sync-indicator {
             position: fixed;
             bottom: 20px;
@@ -460,6 +463,58 @@
         .sync-indicator.success { background-color: #c6f6d5; color: #22543d; }
         .sync-indicator.error { background-color: #fed7d7; color: #c53030; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        
+        /* ✅ CONTROLES DA LIXEIRA */
+        .trash-controls {
+            display: none;
+            background-color: var(--bg-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .trash-controls.show { display: flex; }
+        .trash-controls .btn {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+        }
+        .trash-controls .btn-danger {
+            background-color: #e53e3e;
+            color: white;
+        }
+        .selected-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-left: auto;
+            display: flex;
+            align-items: center;        }
+        
+        /* ✅ CHECKBOX DA LIXEIRA - CORRIGIDO */
+        .trash-card {
+            position: relative;
+            padding-left: 50px !important;
+        }
+        .trash-card .checkbox-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+        }
+        .trash-card .checkbox-wrapper input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            margin: 0;
+            accent-color: #3182ce;
+        }
+        .trash-card.selected {
+            background-color: var(--banner-warning);
+            border-left-color: #fc8181;
+        }
     </style>
 </head>
 <body>
@@ -482,17 +537,26 @@
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="Buscar visitante...">
     </div>
-
     <div id="statsSection" class="stats">
         <div class="stats-grid">
             <div class="stat-box stat-active"><div id="activeCount" class="stat-value">0</div><div>Ativos</div></div>
             <div class="stat-box stat-pending"><div id="pendingCount" class="stat-value">0</div><div>Pendentes</div></div>
             <div class="stat-box stat-expired"><div id="expiredCount" class="stat-value">0</div><div>Vencidos</div></div>
-        </div>    </div>
+        </div>
+    </div>
 
-    <div class="main-buttons">
+    <!-- ✅ BOTÕES PRINCIPAIS (Some na Lixeira) -->
+    <div class="main-buttons" id="mainButtons">
         <button class="btn btn-primary" id="showAddModalBtn">➕ Nova Liberação</button>
         <button class="btn btn-secondary" id="showFilterModalBtn">🔍 Filtrar</button>
+    </div>
+
+    <!-- ✅ CONTROLES DA LIXEIRA (Aparece só na Lixeira) -->
+    <div id="trashControls" class="trash-controls">
+        <button class="btn btn-secondary" id="selectAllBtn">✅ Selecionar Tudo</button>
+        <button class="btn btn-danger" id="deleteSelectedBtn">🗑️ Excluir Selecionados</button>
+        <button class="btn btn-danger" id="emptyTrashBtn">🗑️ Esvaziar Lixeira</button>
+        <span class="selected-count" id="selectedCount">0 selecionados</span>
     </div>
 
     <div id="visitorsList"></div>
@@ -522,8 +586,7 @@
             </div>
             <form id="addForm">
                 <div class="form-section">
-                    <div class="form-section-title">👤 Visitante</div>
-                    <div class="form-group">
+                    <div class="form-section-title">👤 Visitante</div>                    <div class="form-group">
                         <label>Nome</label>
                         <input type="text" id="visitorName" required>
                     </div>
@@ -537,7 +600,8 @@
                     <div class="form-group">
                         <label>Morador</label>
                         <input type="text" id="resident" placeholder="Ex: João Silva">
-                    </div>                </div>
+                    </div>
+                </div>
                 <div class="form-section">
                     <div class="form-section-title">🚗 Veículo</div>
                     <div class="form-row">
@@ -571,8 +635,7 @@
                 <div class="form-group">
                     <label>Observações</label>
                     <textarea id="notes" rows="3"></textarea>
-                </div>
-                <div class="modal-buttons">
+                </div>                <div class="modal-buttons">
                     <button type="button" class="btn-modal-cancel" id="cancelModalBtn">Cancelar</button>
                     <button type="submit" class="btn-modal-save">Salvar</button>
                 </div>
@@ -586,7 +649,8 @@
                 <h2 class="modal-title">📋 Detalhes</h2>
                 <button class="modal-close" id="closeViewModalBtn">×</button>
             </div>
-            <div id="viewContent"></div>            <div class="modal-buttons">
+            <div id="viewContent"></div>
+            <div class="modal-buttons">
                 <button type="button" class="btn-modal-cancel" id="closeViewBtn2">Fechar</button>
                 <button type="button" class="btn-modal-save" id="editFromViewBtn">📝 Editar</button>
             </div>
@@ -620,8 +684,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">💾 Backup de Dados</h2>
-                <button class="modal-close" id="closeBackupModalBtn">×</button>
-            </div>
+                <button class="modal-close" id="closeBackupModalBtn">×</button>            </div>
             <div style="margin-bottom: 16px;">
                 <p style="color: var(--text-secondary); margin-bottom: 16px;">Proteja seus dados fazendo backup regularmente!</p>
                 
@@ -635,7 +698,8 @@
                 <hr id="backupDivider" style="margin: 16px 0; border: 1px solid var(--border-color);">
                 
                 <div id="trashBackupSection">
-                    <button class="btn btn-secondary" id="downloadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">🗑️ Backup Lixeira (Baixar)</button>                    <button class="btn btn-secondary" id="uploadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Lixeira</button>
+                    <button class="btn btn-secondary" id="downloadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">🗑️ Backup Lixeira (Baixar)</button>
+                    <button class="btn btn-secondary" id="uploadTrashBackupBtn" style="width: 100%; margin-bottom: 12px;">📤 Restaurar Lixeira</button>
                     <button class="btn btn-secondary" id="saveTrashToDriveBtn" style="width: 100%;">🟢 Salvar Lixeira no Google Drive</button>
                     <button class="btn btn-secondary" id="resetTrashDriveIdBtn" style="width: 100%;">🔄 Recriar Arquivo Lixeira no Drive</button>
                 </div>
@@ -669,8 +733,7 @@
         };
 
         const firebaseApp = initializeApp(firebaseConfig);
-        const db = getFirestore(firebaseApp);
-        const FIRESTORE_DOC_ID = 'visitors_data';
+        const db = getFirestore(firebaseApp);        const FIRESTORE_DOC_ID = 'visitors_data';
 
         const STORAGE_KEY = 'visitors_app_data';
         const TRASH_STORAGE_KEY = 'visitors_app_trash_data';
@@ -684,11 +747,13 @@
         let trashVisitors = [];
         let currentFilter = 'all';
         let currentView = 'main';
-        let editingId = null;        let viewingId = null;
+        let editingId = null;
+        let viewingId = null;
         let driveFileId = null;
         let driveTrashFileId = null;
         let gapiInited = false;
         let gisInited = false;
+        let selectedTrashIds = new Set();
 
         window.isBannerDismissed = () => {
             const dismissedUntil = localStorage.getItem(BANNER_DISMISSED_KEY);
@@ -717,8 +782,7 @@
                 icon.textContent = '✅';
             } else if (status === 'error') {
                 indicator.classList.add('error');
-                icon.textContent = '❌';
-            } else {
+                icon.textContent = '❌';            } else {
                 indicator.classList.remove('success', 'error');
                 icon.textContent = '🔄';
             }
@@ -733,7 +797,8 @@
                 window.showSyncIndicator('sync', 'Sincronizando...');
                 const data = { visitors, trashVisitors, lastSync: new Date().toISOString(), version: '1.0' };
                 await setDoc(doc(db, 'backups', FIRESTORE_DOC_ID), data);
-                console.log('✅ Firebase sync ok');                window.showSyncIndicator('success', 'Sincronizado!');
+                console.log('✅ Firebase sync ok');
+                window.showSyncIndicator('success', 'Sincronizado!');
             } catch (error) {
                 console.error('❌ Firebase sync error:', error);
                 window.showSyncIndicator('error', 'Erro ao sincronizar');
@@ -766,8 +831,7 @@
             const nowStr = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split('T')[0];
             const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
             visitors = visitors.filter(v => {
-                if (!v || typeof v !== 'object') return false;
-                if (v.exitDate === null) return true;
+                if (!v || typeof v !== 'object') return false;                if (v.exitDate === null) return true;
                 const exitDate = new Date(v.exitDate);
                 if (isNaN(exitDate.getTime())) return false;
                 if (v.exitDate < nowStr) {
@@ -782,6 +846,7 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
             localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
         }
+
         window.formatDate = d => {
             if (!d) return 'Saída livre';
             const [y, m, day] = d.split('-');
@@ -815,8 +880,7 @@
                 headerTitle.textContent = `Controle de Visitantes 🔄 ⚠️${expiring.length}`;
             } else {
                 headerTitle.textContent = `Controle de Visitantes 🔄`;
-            }
-            if (window.isBannerDismissed()) {
+            }            if (window.isBannerDismissed()) {
                 banner.style.display = 'none';
                 return;
             }
@@ -831,13 +895,90 @@
                 }).join('');
                 banner.style.display = 'block';
                 banner.classList.remove('fade-out');
-            } else {                banner.style.display = 'none';
+            } else {
+                banner.style.display = 'none';
             }
         };
 
+        window.toggleSelectAll = () => {
+            if (selectedTrashIds.size === trashVisitors.length) {
+                selectedTrashIds.clear();
+            } else {
+                trashVisitors.forEach(v => selectedTrashIds.add(v.id));
+            }
+            window.updateTrashUI();
+        };
+
+        window.toggleTrashSelection = (id) => {
+            if (selectedTrashIds.has(id)) {
+                selectedTrashIds.delete(id);
+            } else {
+                selectedTrashIds.add(id);
+            }
+            window.updateTrashUI();
+        };
+
+        window.updateTrashUI = () => {
+            const controls = document.getElementById('trashControls');
+            const countEl = document.getElementById('selectedCount');
+            const mainButtons = document.getElementById('mainButtons');
+            
+            if (currentView === 'trash') {
+                controls.classList.add('show');
+                mainButtons.classList.add('hide');
+                countEl.textContent = `${selectedTrashIds.size} selecionados`;
+            } else {
+                controls.classList.remove('show');
+                mainButtons.classList.remove('hide');            }
+
+            document.querySelectorAll('.trash-card').forEach(card => {
+                const id = parseInt(card.dataset.id);
+                if (selectedTrashIds.has(id)) {
+                    card.classList.add('selected');
+                    card.querySelector('.checkbox-wrapper input').checked = true;
+                } else {
+                    card.classList.remove('selected');
+                    card.querySelector('.checkbox-wrapper input').checked = false;
+                }
+            });
+        };
+
+        window.deleteSelected = () => {
+            if (selectedTrashIds.size === 0) {
+                alert('⚠️ Nenhum visitante selecionado!');
+                return;
+            }
+            if (!confirm(`⚠️ Excluir ${selectedTrashIds.size} visitante(s) permanentemente?\n\nEsta ação NÃO pode ser desfeita!`)) {
+                return;
+            }
+            trashVisitors = trashVisitors.filter(v => !selectedTrashIds.has(v.id));
+            selectedTrashIds.clear();
+            localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
+            window.render();
+            window.updateTrashUI();
+            window.syncToFirebase();
+            alert(`✅ ${trashVisitors.length === 0 ? 'Lixeira esvaziada!' : selectedTrashIds.size + ' visitante(s) excluído(s)!'} `);
+        };
+
+        window.emptyTrash = () => {
+            if (trashVisitors.length === 0) {
+                alert('✅ Lixeira já está vazia!');
+                return;
+            }
+            if (!confirm(`⚠️ ESVAZIAR LIXEIRA?\n\nIsso excluirá PERMANENTEMENTE todos os ${trashVisitors.length} visitantes da lixeira.\n\nEsta ação NÃO pode ser desfeita!`)) {
+                return;
+            }
+            trashVisitors = [];
+            selectedTrashIds.clear();
+            localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
+            window.render();
+            window.updateTrashUI();
+            window.syncToFirebase();
+            alert('✅ Lixeira esvaziada com sucesso!');
+        };
+
         window.render = () => {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const list = currentView === 'trash' ? trashVisitors : visitors;
+            const search = document.getElementById('searchInput').value.toLowerCase();            const list = currentView === 'trash' ? trashVisitors : visitors;
             const filtered = list.filter(v => {
                 const s = window.getStatus(v);
                 const matchFilter = currentFilter === 'all' || s === currentFilter;
@@ -852,8 +993,17 @@
                        <button class="action-btn action-delete" onclick="event.stopPropagation();window.deleteVisitorPermanently(${v.id})">🗑️</button>`
                     : `<button class="action-btn" onclick="event.stopPropagation();window.editVisitor(${v.id})">✏️</button>
                        <button class="action-btn action-delete" onclick="event.stopPropagation();window.deleteVisitor(${v.id})">🗑️</button>`;
+                
+                const checkbox = currentView === 'trash' 
+                    ? `<div class="checkbox-wrapper" onclick="event.stopPropagation()"><input type="checkbox" onchange="window.toggleTrashSelection(${v.id})"></div>`
+                    : '';
+
+                const trashClass = currentView === 'trash' ? 'trash-card' : '';
+                const trashData = currentView === 'trash' ? `data-id="${v.id}"` : '';
+
                 return `
-                    <div class="visitor-card ${s}" onclick="window.showViewModal(${v.id})">
+                    <div class="visitor-card ${s} ${trashClass}" ${trashData} onclick="${currentView === 'trash' ? '' : `window.showViewModal(${v.id})`}">
+                        ${checkbox}
                         <div class="card-header">
                             <div class="card-info">
                                 <h3>${v.name}</h3>
@@ -877,10 +1027,11 @@
             if (currentView === 'main') {
                 const counts = {active:0,pending:0,expired:0};
                 filtered.forEach(v => { const s=window.getStatus(v); if(counts[s]!==undefined) counts[s]++; });
-                document.getElementById('activeCount').textContent = counts.active;
-                document.getElementById('pendingCount').textContent = counts.pending;
+                document.getElementById('activeCount').textContent = counts.active;                document.getElementById('pendingCount').textContent = counts.pending;
                 document.getElementById('expiredCount').textContent = counts.expired;
-            }        };
+            }
+            window.updateTrashUI();
+        };
 
         window.showViewModal = id => {
             const list = currentView === 'trash' ? trashVisitors : visitors;
@@ -925,15 +1076,16 @@
                 window.render();
                 window.checkExpiring();
                 window.syncToFirebase();
-            }
-        };
+            }        };
 
         window.deleteVisitorPermanently = id => {
-            if (!confirm('Excluir permanentemente?')) return;            const idx = trashVisitors.findIndex(v => v.id === id);
+            if (!confirm('Excluir permanentemente?')) return;
+            const idx = trashVisitors.findIndex(v => v.id === id);
             if (idx !== -1) {
                 trashVisitors.splice(idx, 1);
                 localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
                 window.render();
+                window.updateTrashUI();
                 window.syncToFirebase();
             }
         };
@@ -973,12 +1125,12 @@
                 document.getElementById('exitDate').required = true;
             }
             document.getElementById('modalTitle').textContent = 'Editar Liberação';
-            document.getElementById('addModal').style.display = 'flex';
-        };
+            document.getElementById('addModal').style.display = 'flex';        };
 
         window.toggleTheme = () => {
             const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';            document.documentElement.setAttribute('data-theme', next);
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
             document.getElementById('toggleThemeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
         };
@@ -1022,12 +1174,12 @@
                         localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashVisitors));
                         window.render();
                         window.checkExpiring();
-                        window.syncToFirebase();
-                        document.getElementById('backupModal').style.display = 'none';
+                        window.syncToFirebase();                        document.getElementById('backupModal').style.display = 'none';
                         alert('✅ Backup restaurado!');
                     }
                 } catch(err) {
-                    alert('❌ Erro ao ler arquivo!');                }
+                    alert('❌ Erro ao ler arquivo!');
+                }
             };
             reader.readAsText(file);
         };
@@ -1065,18 +1217,14 @@
             return data.files && data.files.length > 0 ? data.files[0].id : null;
         };
 
-        // ✅ FUNÇÃO COM CORREÇÃO AUTOMÁTICA DE ERRO 404
         window.saveToGoogleDrive = async (retryCount = 0) => {
             console.log('🟢 Salvando no Google Drive (manual)...');
-            
             if (!gapiInited || !gisInited) {
                 alert('Carregando serviços do Google... Tente em 2 segundos.');
                 return;
             }
-
-            driveFileId = localStorage.getItem('googleDriveBackupFileId');
-
-            const tokenClient = google.accounts.oauth2.initTokenClient({                client_id: CLIENT_ID,
+            driveFileId = localStorage.getItem('googleDriveBackupFileId');            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
                 scope: SCOPES,
                 callback: async (resp) => {
                     if (resp.error) {
@@ -1084,30 +1232,18 @@
                         alert('Autenticação falhou.');
                         return;
                     }
-
                     const accessToken = resp.access_token;
-
                     if (!driveFileId) {
                         driveFileId = await window.findExistingFile(accessToken, GOOGLE_DRIVE_FILE_NAME);
                     }
-
-                    const backupData = {
-                        version: '1.0',
-                        exportDate: new Date().toISOString(),
-                        visitors: visitors
-                    };
+                    const backupData = { version: '1.0', exportDate: new Date().toISOString(), visitors: visitors };
                     const fileContent = JSON.stringify(backupData, null, 2);
                     const blob = new Blob([fileContent], { type: 'application/json' });
-
                     let url, method, headers, body;
-
                     if (driveFileId) {
                         url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`;
                         method = 'PATCH';
-                        headers = {
-                            'Authorization': `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json'
-                        };
+                        headers = { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
                         body = blob;
                     } else {
                         const metadata = { name: GOOGLE_DRIVE_FILE_NAME, mimeType: 'application/json' };
@@ -1119,17 +1255,15 @@
                         headers = { 'Authorization': `Bearer ${accessToken}` };
                         body = form;
                     }
-
                     try {
                         const response = await fetch(url, { method, headers, body });
                         const result = await response.json();
-
                         if (response.ok) {
-                            if (result.id) {                                localStorage.setItem('googleDriveBackupFileId', result.id);
+                            if (result.id) {
+                                localStorage.setItem('googleDriveBackupFileId', result.id);
                             }
                             alert('✅ Backup de VISITANTES salvo com sucesso!\n\nArquivo: ' + GOOGLE_DRIVE_FILE_NAME);
                         } else {
-                            // ✅ CORREÇÃO AUTOMÁTICA PARA ERRO 404
                             if (result.error?.code === 404 || (result.error?.message && result.error.message.includes('File not found'))) {
                                 if (retryCount < 2) {
                                     console.log('⚠️ Arquivo não encontrado (404). Limpando ID e tentando novamente...');
@@ -1138,8 +1272,7 @@
                                     window.saveToGoogleDrive(retryCount + 1);
                                     return;
                                 } else {
-                                    alert('❌ Erro ao salvar: Arquivo não encontrado.\n\nSolução: Clique em "🔄 Recriar Arquivo no Drive" no menu Backup.');
-                                }
+                                    alert('❌ Erro ao salvar: Arquivo não encontrado.\n\nSolução: Clique em "🔄 Recriar Arquivo no Drive" no menu Backup.');                                }
                             } else {
                                 console.error('Erro no upload:', result);
                                 alert('❌ Falha ao salvar:\n' + (result.error?.message || 'Erro desconhecido'));
@@ -1151,11 +1284,9 @@
                     }
                 }
             });
-
             tokenClient.requestAccessToken({ prompt: '' });
         };
 
-        // ✅ FUNÇÃO PARA RECRIAR ARQUIVO DO ZERO
         window.resetDriveFileId = async () => {
             if (confirm('🔄 Recriar arquivo no Google Drive?\n\nIsso vai criar um NOVO arquivo e ignorar o antigo.')) {
                 localStorage.removeItem('googleDriveBackupFileId');
@@ -1174,30 +1305,23 @@
                 scope: SCOPES,
                 callback: async (resp) => {
                     if (resp.error) {
-                        console.error('OAuth error:', resp);                        alert('Autenticação falhou.');
+                        console.error('OAuth error:', resp);
+                        alert('Autenticação falhou.');
                         return;
                     }
                     const accessToken = resp.access_token;
                     if (!driveTrashFileId) {
                         driveTrashFileId = await window.findExistingFile(accessToken, GOOGLE_DRIVE_TRASH_FILE_NAME);
                     }
-                    const backupData = {
-                        version: '1.0',
-                        exportDate: new Date().toISOString(),
-                        trashVisitors: trashVisitors
-                    };
+                    const backupData = { version: '1.0', exportDate: new Date().toISOString(), trashVisitors: trashVisitors };
                     const fileContent = JSON.stringify(backupData, null, 2);
                     const blob = new Blob([fileContent], { type: 'application/json' });
                     let url, method, headers, body;
                     if (driveTrashFileId) {
                         url = `https://www.googleapis.com/upload/drive/v3/files/${driveTrashFileId}?uploadType=media`;
                         method = 'PATCH';
-                        headers = {
-                            'Authorization': `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json'
-                        };
-                        body = blob;
-                    } else {
+                        headers = { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+                        body = blob;                    } else {
                         const metadata = { name: GOOGLE_DRIVE_TRASH_FILE_NAME, mimeType: 'application/json' };
                         const form = new FormData();
                         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -1223,7 +1347,8 @@
                                     alert('⚠️ Arquivo antigo não encontrado no Google Drive.\n\nCriando novo arquivo automaticamente...');
                                     window.saveTrashToGoogleDrive(retryCount + 1);
                                     return;
-                                } else {                                    alert('❌ Erro ao salvar: Arquivo não encontrado.\n\nSolução: Clique em "🔄 Recriar Arquivo Lixeira no Drive" no menu Backup.');
+                                } else {
+                                    alert('❌ Erro ao salvar: Arquivo não encontrado.\n\nSolução: Clique em "🔄 Recriar Arquivo Lixeira no Drive" no menu Backup.');
                                 }
                             } else {
                                 console.error('Erro no upload:', result);
@@ -1245,7 +1370,6 @@
                 alert('ID antigo removido!\n\nAgora clique em "🟢 Salvar Lixeira no Google Drive" para criar novo arquivo.');
             }
         };
-
         window.loadGoogleScripts = () => {
             const gapiScript = document.createElement('script');
             gapiScript.src = 'https://apis.google.com/js/api.js';
@@ -1273,6 +1397,7 @@
             }
             window.render();
             window.checkExpiring();
+
             document.getElementById('showAddModalBtn').onclick = () => {
                 editingId = null;
                 document.getElementById('addForm').reset();
@@ -1294,8 +1419,7 @@
                 document.getElementById('statsSection').style.display = document.getElementById('statsSection').style.display === 'none' ? 'block' : 'none';
             };
             document.getElementById('backupBtn').onclick = () => {
-                document.getElementById('mainBackupSection').style.display = currentView === 'trash' ? 'none' : 'block';
-                document.getElementById('backupDivider').style.display = currentView === 'trash' ? 'none' : 'block';
+                document.getElementById('mainBackupSection').style.display = currentView === 'trash' ? 'none' : 'block';                document.getElementById('backupDivider').style.display = currentView === 'trash' ? 'none' : 'block';
                 document.getElementById('trashBackupSection').style.display = currentView === 'trash' ? 'block' : 'none';
                 document.getElementById('backupModal').style.display = 'flex';
             };
@@ -1321,7 +1445,8 @@
             };
             document.getElementById('noExitDate').onchange = e => {
                 document.getElementById('exitDate').disabled = e.target.checked;
-                document.getElementById('exitDate').required = !e.target.checked;                if (e.target.checked) document.getElementById('exitDate').value = '';
+                document.getElementById('exitDate').required = !e.target.checked;
+                if (e.target.checked) document.getElementById('exitDate').value = '';
             };
             document.getElementById('searchInput').oninput = window.render;
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1330,6 +1455,7 @@
                     btn.classList.add('active');
                     currentView = btn.dataset.view || 'main';
                     currentFilter = btn.dataset.filter || 'all';
+                    selectedTrashIds.clear();
                     window.render();
                     window.checkExpiring();
                 };
@@ -1342,8 +1468,7 @@
             };
             document.getElementById('clearFilterBtn').onclick = () => {
                 document.getElementById('filterStatus').value = 'all';
-                currentFilter = 'all';
-                document.getElementById('filterModal').style.display = 'none';
+                currentFilter = 'all';                document.getElementById('filterModal').style.display = 'none';
                 window.render();
             };
             document.getElementById('downloadBackupBtn').onclick = window.downloadBackup;
@@ -1354,9 +1479,13 @@
             document.getElementById('restoreTrashFileInput').onchange = e => { if(e.target.files[0]) window.restoreTrashBackup(e.target.files[0]); };
             document.getElementById('saveToDriveBtn').onclick = window.saveToGoogleDrive;
             document.getElementById('saveTrashToDriveBtn').onclick = window.saveTrashToGoogleDrive;
-            // ✅ NOVOS BOTÕES PARA RECRIAR ARQUIVO
             document.getElementById('resetDriveIdBtn').onclick = window.resetDriveFileId;
             document.getElementById('resetTrashDriveIdBtn').onclick = window.resetTrashDriveFileId;
+            
+            // ✅ BOTÕES DA LIXEIRA
+            document.getElementById('selectAllBtn').onclick = window.toggleSelectAll;
+            document.getElementById('deleteSelectedBtn').onclick = window.deleteSelected;
+            document.getElementById('emptyTrashBtn').onclick = window.emptyTrash;
         });
 
         if ('serviceWorker' in navigator) {
